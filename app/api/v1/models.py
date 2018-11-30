@@ -32,6 +32,6 @@ class IncidentSchema(Schema):
     status = fields.Str()
     images = fields.Str()
     videos = fields.Str()
-    comment = fields.Str()
+    comment = fields.Str(required=True, help=("please comment on the incident you would like to report"))
 
 
