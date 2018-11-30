@@ -13,16 +13,16 @@ class MyIncidents(Resource):
 
     def get(self):
         incidents = incidents_Schema.dump(incident_list).data
-        return {"status":"success", "data":incidents}, 200
+        return jsonify({"status": 200, "data": [incidents]})
     
     def post(self):
         json_data = request.get_json(force=True)
         if not json_data:
                return {'message': 'No input data provided'}, 400
-        # Validate and deserialize input
+        # Validate and deserialize input 
         data, errors = incident_Schema.dump(json_data)
         if errors:
-            return {"status": "error", "data": errors}, 422
+            return {"status": 422, "data": errors}, 422
         new_incident = Incident(
             createdBy = data['createdBy'],
             type_of_incident = data['type_of_incident'],
@@ -35,8 +35,7 @@ class MyIncidents(Resource):
         
         incident_list.append(new_incident)
         result = incident_Schema.dump(new_incident).data
-
-        return {'status': "success", 'data': result}, 201
+        return jsonify({'status': 201, 'data': [{"id" : result['id'], "message" : "created red flag record" }]})
 
 class MyIncident(Resource):
     def __init__(self):
@@ -44,7 +43,9 @@ class MyIncident(Resource):
 
     def get(self, id):
         incident = incident_Schema.dump(incident_list[id-1]).data
-        return {"status":"success", "data":incident}, 200
+        if len(incident) == 0:
+            abort(404)
+        return jsonify({"status": 200, "data": [incident]})
 
     def put(self, id):
         incident = incident_Schema.dump(incident_list[id-1]).data
@@ -55,18 +56,19 @@ class MyIncident(Resource):
         data = incident_Schema.dump(json_data).data
         for key in data.keys():
             if data[key] is not None:
-                incident[key] = data[key]
+                incident[key] = data[key] 
 
         updated_incident = incident_Schema.load(incident).data
         incident_list[id-1] = updated_incident
+
         result = incident_Schema.dump(incident).data
         
 
-        return {'status': "success", 'data': result}, 201
+        return jsonify({'status': 204, 'data': [{"id" : result['id'], "message" : "updated red flag record" }]})
 
     def delete(self, id):
         incident = incident_list[id-1]
         incident_list.remove(incident)
         
         result = incident_Schema.dump(incident).data
-        return { "Status": "success", "data": result}
+        return jsonify({"Status": 204, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
