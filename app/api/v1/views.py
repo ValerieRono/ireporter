@@ -63,3 +63,10 @@ class MyIncident(Resource):
         
 
         return {'status': "success", 'data': result}, 201
+
+    def delete(self, id):
+        incident = incident_list[id-1]
+        incident_list.remove(incident)
+        
+        result = incident_Schema.dump(incident).data
+        return { "Status": "success", "data": result}
