@@ -37,3 +37,11 @@ class MyIncidents(Resource):
         result = incident_Schema.dump(new_incident).data
 
         return {'status': "success", 'data': result}, 201
+
+class MyIncident(Resource):
+    def __init__(self):
+        super(MyIncident, self).__init__()
+
+    def get(self, id):
+        incident = incident_Schema.dump(incident_list[id-1]).data
+        return {"status":"success", "data":incident}, 200
