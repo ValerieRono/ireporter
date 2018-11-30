@@ -45,3 +45,21 @@ class MyIncident(Resource):
     def get(self, id):
         incident = incident_Schema.dump(incident_list[id-1]).data
         return {"status":"success", "data":incident}, 200
+
+    def put(self, id):
+        incident = incident_Schema.dump(incident_list[id-1]).data
+        json_data = request.get_json(force=True)
+        if not json_data:
+               return {'message': 'No input data provided'}, 400
+        # Validate and deserialize input
+        data = incident_Schema.dump(json_data).data
+        for key in data.keys():
+            if data[key] is not None:
+                incident[key] = data[key]
+
+        updated_incident = incident_Schema.load(incident).data
+        incident_list[id-1] = updated_incident
+        result = incident_Schema.dump(incident).data
+        
+
+        return {'status': "success", 'data': result}, 201
