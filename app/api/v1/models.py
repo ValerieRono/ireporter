@@ -3,7 +3,30 @@ import datetime as dt
 
 
 #incident list
-incident_list = []
+incident_list = [
+    {
+        "id": 1,
+        "createdOn" : dt.datetime.now,  
+        "createdBy" : "Valerie Rono", 
+        "type_of_incident" : "RedFlag",
+        "location" : "coordinates",
+        "status": "pending",
+        "images" : "file path", 
+        "videos" : "file path",
+        "comment" : "traffic police bribery"
+    },
+    {
+        "id": 2,
+        "createdOn" : dt.datetime.now,  
+        "createdBy" : "Valerie Rono", 
+        "type_of_incident" : "RedFlag",
+        "location" : "coordinates",
+        "status": "pending",
+        "images" : "file path", 
+        "videos" : "file path",
+        "comment" : "traffic police bribery"
+    }
+]
 
 #basic incident model
 class Incident(object):
