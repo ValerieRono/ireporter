@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_restful import Api, Resource 
 
 #local import
-from views import MyIncidents, MyIncident
+from views import MyIncidents
 
 
 v1 = Blueprint('api-v1', __name__, url_prefix='/api/v1')
