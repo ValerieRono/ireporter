@@ -2,7 +2,7 @@ from flask import Flask, jsonify, abort, make_response, request
 from flask_restful import Api, Resource, fields
 
 #local import
-from models import Incident, IncidentSchema, incident_list
+from app.api.v1.models import Incident, IncidentSchema, incident_list
 
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)

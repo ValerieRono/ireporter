@@ -1,13 +1,13 @@
 language: python
 
 python:
--"2.7.10"
+  - "3.6"
 
 install:
-  -pip install -r requirements.txt
+  - pip install -r requirements.txt
 
 script:
-  -pytest --with-coverage -cover-package=app app/tests
+  - py.test -v --cov-report term-missing --cov app 
 
 after_success:
-  -coveralls
+  - coveralls

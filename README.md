@@ -1,4 +1,4 @@
-#iReporter 
+#iReporter [![Build Status](https://travis-ci.com/ValerieRono/ireporter.svg?branch=develop)](https://travis-ci.com/ValerieRono/ireporter) [![codecov](https://codecov.io/gh/ValerieRono/ireporter/branch/develop/graph/badge.svg)](https://codecov.io/gh/ValerieRono/ireporter)
 
 A RESTFUL citizen-reporting api built on Python Flask that allows users to report incidences that need interventions from the government or that people need to be aware of(red flag records).
 
