@@ -6,7 +6,7 @@ import marshmallow
 
 
 #local import 
-from base import BaseTestCase
+from app.tests.v1.base import BaseTestCase
 
 class TestRequests(BaseTestCase):
     """Tests"""
