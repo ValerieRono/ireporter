@@ -7,7 +7,7 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - pytest --with-coverage -cover-package=app app/tests
+  - py.test -v --cov-report term-missing --cov app 
 
 after_success:
   - coveralls
