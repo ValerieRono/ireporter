@@ -37,7 +37,23 @@ class MyIncidents(Resource):
         
         incident_list.append(new_incident)
         result = incident_Schema.dump(new_incident).data
-        return jsonify({'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record" }]})
+
+        message = {
+            'status': 201,
+            "data" : [{
+                "id" : result['id'],
+                "message" : "created red flag record"
+            }
+            ]
+            
+        }
+        resp = jsonify(message)
+        resp.status_code = 201
+
+        return resp
+        #return {'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record"}]}, 201
+        #return jsonify({'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record"}]})
+        
 
 class MyIncident(Resource):
     def __init__(self):
@@ -74,4 +90,21 @@ class MyIncident(Resource):
         incident_list.remove(incident)
         
         result = incident_Schema.dump(incident).data
-        return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
+
+        return { "status": 204, 'data': [{"id" : result['id'], "message" : "deleted a red flag record"}]}, 204
+
+        #message = {
+        #    'status': 204,
+        #    "data" : [{
+        #        "id" : result['id'],
+        #        "message" : "deleted a red flag record"
+        #    }
+        #    ]
+        #   
+        #}
+        #resp = jsonify(message)
+        #resp.status_code = 204
+
+        #return resp
+        # for sanity check
+        # return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
