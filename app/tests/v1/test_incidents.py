@@ -15,7 +15,7 @@ class TestRequests(BaseTestCase):
         #correct request
         response = self.client.post('api/v1/incidents', data=json.dumps(
             self.incident), headers={'content-type': "application/json"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 201)
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]["message"], 'created red flag record')
 

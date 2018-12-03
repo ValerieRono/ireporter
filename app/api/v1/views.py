@@ -91,7 +91,7 @@ class MyIncident(Resource):
         
         result = incident_Schema.dump(incident).data
 
-        return { "status": 204, 'data': [{"id" : result['id'], "message" : "deleted a red flag record"}]}, 204
+        #return { "status": 204, 'data': [{"id" : result['id'], "message" : "deleted a red flag record"}]}, 204
 
         #message = {
         #    'status': 204,
@@ -107,4 +107,4 @@ class MyIncident(Resource):
 
         #return resp
         # for sanity check
-        # return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
+        return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
