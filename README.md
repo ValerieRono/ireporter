@@ -1,4 +1,4 @@
-#iReporter [![Build Status](https://travis-ci.com/ValerieRono/ireporter.svg?branch=develop)](https://travis-ci.com/ValerieRono/ireporter) 
+#iReporter [![Build Status](https://travis-ci.com/ValerieRono/ireporter.svg?branch=develop)](https://travis-ci.com/ValerieRono/ireporter) [![Coverage Status](https://coveralls.io/repos/github/ValerieRono/ireporter/badge.svg?branch=bg-fix-endpoints-output-format)](https://coveralls.io/github/ValerieRono/ireporter?branch=bg-fix-endpoints-output-format)
 
 A RESTFUL citizen-reporting api built on Python Flask that allows users to report incidences that need interventions from the government or that people need to be aware of(red flag records).
 
