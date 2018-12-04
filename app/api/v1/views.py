@@ -18,18 +18,17 @@ class MyIncidents(Resource):
     def post(self):
         json_data = request.get_json(force=True)
         if not json_data:
-               return jsonify({'status':200, 'message': 'no input data provided'})
+               return {'status':200, 'message': 'no input data provided'}, 404
         # Validate and deserialize input 
         data, errors = incident_Schema.dump(json_data)
         if errors:
-            return jsonify({"status": 422, "data": errors})
+            return {"status": 422, "data": errors}, 422
         elif not data['comment']:
-            return jsonify({"status": 200, "data": [{"message" : "please comment on the incident you would like to report"}]})
+            return {"status": 404, "data": [{"message" : "please comment on the incident you would like to report"}]}, 404
         new_incident = Incident(
             createdBy = data['createdBy'],
             type_of_incident = data['type_of_incident'],
             location = data['location'],
-            status = data['status'],
             images = data['images'],
             videos = data['videos'],
             comment = data['comment']
@@ -73,7 +72,7 @@ class MyIncident(Resource):
     def put(self, id):
         json_data = request.get_json(force=True)
         if not json_data:
-               return jsonify({'status':200, 'message': 'no input data provided'})
+               return {'status':404, 'message': 'no input data provided'}, 404
         # Validate and deserialize input
         data = incident_Schema.dump(json_data).data
         incidents = incidents_Schema.dump(incident_list).data
