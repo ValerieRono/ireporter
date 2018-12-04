@@ -62,8 +62,5 @@ class Incident(object):
         return '<Incident(comment={self.comment!r})>'.format(self=self)
 
     
-        #if len(incident_list):
-         #   return incident_list[-1]["id"] + 1
-        #return 1
-
+        
 

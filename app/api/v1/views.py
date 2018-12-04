@@ -37,21 +37,11 @@ class MyIncidents(Resource):
         incident_list.append(new_incident)
         result = incident_Schema.dump(new_incident).data
 
-        #message = {
-        #   'status': 201,
-        #    "data" : [{
-        #        "id" : result['id'],
-        #        "message" : "created red flag record"
-        #    }
-        #    ]
-        #    
-        #}
-        #resp = jsonify(message)
-        #resp.status_code = 201
+        
 
         #return resp
         return {'status': 201, 'data': [{"record" : result, "message": "created red flag record"}]}, 201
-        #return jsonify({'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record"}]})
+        
         
 
 class MyIncident(Resource):
@@ -111,4 +101,4 @@ class MyIncident(Resource):
         
         
         
-        #return {'status': 204, 'data': [{"id" : result['id'], "message" : "deleted red flag record"}]},204
+        
