@@ -70,7 +70,7 @@ GET
  
   payload 
   ```
-  {"createdBy": "changedname"} any field name and value that you want to edit
+  {"createdBy": "changedname"} //any field name and value that you want to edit, can be multiple values
   ```
 5.deleting a red flag record -
 -route
@@ -86,7 +86,9 @@ GET
 
 using pytest
 In the root directory of the application, run the following command
-----`pytest`
+```
+pytest
+```
 
 # **Deployment**
 
