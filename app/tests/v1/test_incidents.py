@@ -24,7 +24,7 @@ class TestRequests(BaseTestCase):
         #no body
         response = self.client.post('api/v1/incidents', data=json.dumps(
             self.incident_without_comment), headers={'content-type': "application/json"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
         
     def test_get_all_incidents(self):
         """Test for viewing all redflags"""
@@ -81,9 +81,9 @@ class TestRequests(BaseTestCase):
         response2 = self.client.put('api/v1/incidents/2',
                                 data=json.dumps(self.no_input),
                                 headers={'content-type': "application/json"})
-        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response1.status_code, 404)
         result1 = json.loads(response1.data)
         self.assertEqual(result1["message"], 'no input data provided')
-        self.assertEqual(response2.status_code, 200)
+        self.assertEqual(response2.status_code, 404)
         result2 = json.loads(response2.data)
         self.assertEqual(result2["message"], 'no input data provided')
