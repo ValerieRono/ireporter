@@ -18,7 +18,7 @@ class BaseTestCase(unittest.TestCase):
         "createdBy" : "Valerie Rono", 
         "type_of_incident" : "RedFlag",
         "location" : "coordinates",
-        "status": "pending",
+        "status": "resolved",
         "images" : "file path", 
         "videos" : "file path",
         "comment" : "traffic police bribery"
@@ -29,7 +29,7 @@ class BaseTestCase(unittest.TestCase):
         "createdBy" : "Valerie Rono", 
         "type_of_incident" : "RedFlag",
         "location" : "coordinates",
-        "status": "pending",
+        "status": "resolved",
         "images" : "file path", 
         "videos" : "file path",
         "comment" : "traffic police bribery"
@@ -40,7 +40,7 @@ class BaseTestCase(unittest.TestCase):
             "createdBy" : "Valerie Rono", 
             "type_of_incident" : "RedFlag",
             "location" : "coordinates",
-            "status": "pending",
+            "status": "rejected",
             "images" : "file path", 
             "videos" : "file path",
             "comment" : "traffic police bribery"
@@ -50,7 +50,16 @@ class BaseTestCase(unittest.TestCase):
             "createdBy" : "Valerie Rono", 
             "type_of_incident" : "RedFlag",
             "location" : "coordinates",
-            "status": "pending",
+            "status": "draft",
+            "images" : "file path", 
+            "videos" : "file path",
+            "comment" : "power outage"
+        }
+        self.update_incident_under_draft = { 
+            "createdBy" : "Valerie Rono", 
+            "type_of_incident" : "RedFlag",
+            "location" : "coordinates",
+            "status": "draft",
             "images" : "file path", 
             "videos" : "file path",
             "comment" : "power outage"
@@ -59,7 +68,7 @@ class BaseTestCase(unittest.TestCase):
             "createdBy" : "Valerie Rono", 
             "type_of_incident" : "RedFlag",
             "location" : "coordinates",
-            "status": "pending",
+            "status": "under investigation",
             "images" : "file path", 
             "videos" : "file path",
             "comment" : ""

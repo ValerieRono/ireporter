@@ -38,20 +38,20 @@ class MyIncidents(Resource):
         incident_list.append(new_incident)
         result = incident_Schema.dump(new_incident).data
 
-        message = {
-            'status': 201,
-            "data" : [{
-                "id" : result['id'],
-                "message" : "created red flag record"
-            }
-            ]
-            
-        }
-        resp = jsonify(message)
-        resp.status_code = 201
+        #message = {
+        #   'status': 201,
+        #    "data" : [{
+        #        "id" : result['id'],
+        #        "message" : "created red flag record"
+        #    }
+        #    ]
+        #    
+        #}
+        #resp = jsonify(message)
+        #resp.status_code = 201
 
-        return resp
-        #return {'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record"}]}, 201
+        #return resp
+        return {'status': 201, 'data': [{"record" : result, "message": "created red flag record"}]}, 201
         #return jsonify({'status': 200, 'data': [{"id" : result['id'], "message" : "created red flag record"}]})
         
 
@@ -60,51 +60,56 @@ class MyIncident(Resource):
         super(MyIncident, self).__init__()
 
     def get(self, id):
-        if 0 < id <= len(incident_list):
-             incident = incident_Schema.dump(incident_list[id-1]).data
-             return jsonify({"status": 200, "data": [incident]})
-        abort(404)
-        
+        incidents = incidents_Schema.dump(incident_list).data
+        for incident in incidents:
+            if incident['id'] == id:
+                incidents = incidents_Schema.dump(incident_list).data
+                incident = [incident for incident in incidents if incident['id'] == id]
+                return jsonify({"status": 200, "data": [incident]})
+
+        return {'status': 404, 'data': [{"message" : "red flag record not found"}]}, 404
+    
 
     def put(self, id):
-        incident = incident_Schema.dump(incident_list[id-1]).data
         json_data = request.get_json(force=True)
         if not json_data:
                return jsonify({'status':200, 'message': 'no input data provided'})
         # Validate and deserialize input
         data = incident_Schema.dump(json_data).data
-        for key in data.keys():
-            if data[key] is not None:
-                incident[key] = data[key] 
+        incidents = incidents_Schema.dump(incident_list).data
+        for incident in incidents:
+            if incident['id'] == id:
+                if incident['status'] != "draft":
+                    return {'status': 404, 'data': [{"message" : "cannot edit record"}]}, 404
+        
+                for key in data.keys():
+                    if data[key] is not None:
+                        incident[key] = data[key] 
 
-        updated_incident = incident_Schema.load(incident).data
-        incident_list[id-1] = updated_incident
+                    updated_incident = incident_Schema.load(incident).data
+                    incident_list[id-1] = updated_incident
 
-        result = incident_Schema.dump(incident).data
+                    result = incident_Schema.dump(incident).data
+        
+        
         
 
-        return jsonify({'status': 200, 'data': [{"id" : result['id'], "message" : "updated red flag record" }]})
+        return jsonify({'status': 200, 'data': [{"record" : result, "message" : "updated red flag record" }]})
 
     def delete(self, id):
-        incident = incident_list[id-1]
-        incident_list.remove(incident)
+        incidents = incidents_Schema.dump(incident_list).data
+        for incident in incidents:
+            if incident['id'] == id:
+                incident = incident_list[id-1]
+                incident_list.remove(incident)
         
-        result = incident_Schema.dump(incident).data
+                result = incident_Schema.dump(incident).data
 
-        #return { "status": 204, 'data': [{"id" : result['id'], "message" : "deleted a red flag record"}]}, 204
-
-        #message = {
-        #    'status': 204,
-        #    "data" : [{
-        #        "id" : result['id'],
-        #        "message" : "deleted a red flag record"
-        #    }
-        #    ]
-        #   
-        #}
-        #resp = jsonify(message)
-        #resp.status_code = 204
-
-        #return resp
-        # for sanity check
-        return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
+        
+                return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
+            
+        return {'status': 404, 'data': [{"message" : "red flag record not found"}]}, 404
+        
+        
+        
+        #return {'status': 204, 'data': [{"id" : result['id'], "message" : "deleted red flag record"}]},204

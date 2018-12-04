@@ -57,6 +57,15 @@ class TestRequests(BaseTestCase):
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]["message"], 'updated red flag record')
 
+    def test_uneditable_record(self):
+        """Test for modifying a record whose status is pending"""
+        response = self.client.put('api/v1/incidents/1',
+                                data=json.dumps(self.update_incident_under_draft),
+                                headers={'content-type': "application/json"})
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]["message"], 'cannot edit record')
+
         
     def test_user_delete_incident(self):
         """Test for deleting a redflag"""
