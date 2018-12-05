@@ -6,7 +6,7 @@ class Config(object):
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    # DATABASE_URL = os.getenv()
+    DATABASE_URL = os.getenv('DATABASE_URL')
     # DATABASE_URL_TEST = os.getenv()
    
     
@@ -15,7 +15,7 @@ class Config(object):
 class DevelopmentConfig(Config):
     """Configurations for Development."""
     DEBUG = True
-
+    DATABASE_URL = os.getenv('DATABASE_URL')
 
 class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""

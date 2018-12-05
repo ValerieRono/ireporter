@@ -3,33 +3,35 @@ import datetime as dt
 import uuid
 
 
-#incident list
+# incident list
 incident_list = [
     {
         "id": 1,
-        "createdOn" : dt.datetime.now,  
-        "createdBy" : "Valerie Rono", 
-        "type_of_incident" : "RedFlag",
-        "location" : "coordinates",
+        "createdOn": dt.datetime.now,
+        "createdBy": "Valerie Rono",
+        "type_of_incident": "RedFlag",
+        "location": "coordinates",
         "status": "pending",
-        "images" : "file path", 
-        "videos" : "file path",
-        "comment" : "traffic police bribery"
+        "images": "file path",
+        "videos": "file path",
+        "comment": "traffic police bribery"
     },
     {
         "id": 2,
-        "createdOn" : dt.datetime.now,  
-        "createdBy" : "Valerie Rono", 
-        "type_of_incident" : "RedFlag",
-        "location" : "coordinates",
+        "createdOn": dt.datetime.now,
+        "createdBy": "Valerie Rono",
+        "type_of_incident": "RedFlag",
+        "location": "coordinates",
         "status": "draft",
-        "images" : "file path", 
-        "videos" : "file path",
-        "comment" : "traffic police bribery"
+        "images": "file path",
+        "videos": "file path",
+        "comment": "traffic police bribery"
     }
 ]
 
-#create schema
+# create schema
+
+
 class IncidentSchema(Schema):
     id = fields.Int()
     createdOn = fields.DateTime()
@@ -41,10 +43,13 @@ class IncidentSchema(Schema):
     videos = fields.Str()
     comment = fields.Str()
 
+
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
 
-#basic incident model
+# basic incident model
+
+
 class Incident(object):
     def __init__(self, createdBy, type_of_incident, location, images, videos, comment):
         incidents = incidents_Schema.dump(incident_list).data
@@ -60,7 +65,3 @@ class Incident(object):
 
     def __repr__(self):
         return '<Incident(comment={self.comment!r})>'.format(self=self)
-
-    
-        
-
