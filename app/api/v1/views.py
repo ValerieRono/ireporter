@@ -1,8 +1,21 @@
-from flask import Flask, jsonify, abort, make_response, request
-from flask_restful import Api, Resource, fields
+from flask import Flask, json, jsonify, abort, make_response
+from flask_restful import Api, Resource, reqparse, marshal
+from marshmallow import Schema, fields
 
-#local import
-from app.api.v1.models import Incident, IncidentSchema, incident_list
+# local import
+from app.api.v1.models import record_fields, incidents, record_parser, Incidents
+
+#for serialization 
+class IncidentSchema(Schema):
+    id = fields.Int()
+    createdOn = fields.DateTime()
+    createdBy = fields.Str()
+    type_of_incident = fields.Str()
+    location = fields.Str()
+    status = fields.Str()
+    images = fields.Str()
+    videos = fields.Str()
+    comment = fields.Str()
 
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
@@ -10,97 +23,83 @@ incidents_Schema = IncidentSchema(many=True)
 class MyIncidents(Resource):
     def __init__(self):
         super(MyIncidents, self).__init__()
+        self.parser = record_parser
 
     def get(self):
-        incidents = incidents_Schema.dump(incident_list).data
-        return jsonify({"status": 200, "data": [{"incidents": incidents, "message" : "successfully fetched all records"}]})
-    
+        result = [marshal(incident, record_fields) for incident in incidents]
+        return {"status": 200, "data": [{"incidents": result, "message": "successfully fetched all records"}]}, 200
+        
+
     def post(self):
-        json_data = request.get_json(force=True)
-        if not json_data:
-               return {'status':200, 'message': 'no input data provided'}, 404
-        # Validate and deserialize input 
-        data, errors = incident_Schema.dump(json_data)
-        if errors:
-            return {"status": 422, "data": errors}, 422
-        keys = data.keys()
+        args = self.parser.parse_args()
+        keys = args.keys()
         for key in keys:
-            if  not data[key]:
-                return {"status": 404, "data": [{"message" : "please comment on the incident you would like to report"}]}, 404
-        new_incident = Incident(
-            createdBy = data['createdBy'],
-            type_of_incident = data['type_of_incident'],
-            location = data['location'],
-            images = data['images'],
-            videos = data['videos'],
-            comment = data['comment']
-            )
-        
-        incident_list.append(new_incident)
-        result = incident_Schema.dump(new_incident).data
-
+            if not args[key]:
+                return {"status": 404, "data": [{"message": "please comment on the incident you would like to report"}]}, 404
+        incident = Incidents(
+            createdBy = args['createdBy'],
+            type_of_incident = args['type_of_incident'],
+            location = args['location'],
+            images = args['images'],
+            videos = args['videos'],
+            comment = args['comment']
+        )
+        incidents.append(incident)
+        return {'status': 201, 'data': [{"record": marshal(incident, record_fields), "message": "created red flag record"}]}, 201
         
 
-        #return resp
-        return {'status': 201, 'data': [{"record" : result, "message": "created red flag record"}]}, 201
-        
-        
 
 class MyIncident(Resource):
     def __init__(self):
         super(MyIncident, self).__init__()
+        self.parser = record_parser
 
     def get(self, id):
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
-            if incident['id'] == id:
-                incidents = incidents_Schema.dump(incident_list).data
-                incident = [incident for incident in incidents if incident['id'] == id]
-                return jsonify({"status": 200, "data": [incident]})
-
-        return {'status': 404, 'data': [{"message" : "red flag record not found"}]}, 404
-    
+        new_incidents = incidents_Schema.dump(incidents).data
+        incident = [incident for incident in new_incidents if incident['id'] == id]
+        if len(incident) == 0:
+            abort(404)
+        return {
+            'status': 200,
+            'data': marshal(incident[0], record_fields)
+        }
 
     def put(self, id):
-        json_data = request.get_json(force=True)
-        if not json_data:
-               return {'status':404, 'message': 'no input data provided'}, 404
-        # Validate and deserialize input
-        data = incident_Schema.dump(json_data).data
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
+        new_incidents = incidents_Schema.dump(incidents).data
+        for incident in new_incidents:
             if incident['id'] == id:
-                if incident['status'] != "draft":
-                    return {'status': 404, 'data': [{"message" : "cannot edit record"}]}, 404
-        
-                for key in data.keys():
-                    if data[key] is not None:
-                        incident[key] = data[key] 
+                new_incident = incident
+                if new_incident['status'] != "draft":
+                    return {'status': 404, 'data': [{"message": "cannot edit record"}]}, 404
 
-                    updated_incident = incident_Schema.load(incident).data
-                    incident_list[id-1] = updated_incident
-
-                    result = incident_Schema.dump(incident).data
-        
-        
-        
-
-        return jsonify({'status': 200, 'data': [{"record" : result, "message" : "updated red flag record" }]})
+        if len(new_incident) == 0:
+            abort(404)
+        args = self.parser.parse_args()
+        if not args:
+            abort(400)
+        for key in args.keys():
+            if args[key] in args and type(key) != unicode:
+                abort(400)
+            if args[key] is not None:
+                new_incident[key] = args[key]
+        for item in incidents:
+            if incident_Schema.dump(item).data == new_incident:
+                updated_incident = incident_Schema.load(new_incident).data
+                item == updated_incident
+        return {'status': 200, 'data': [{'record': marshal(new_incident, record_fields), "message": "updated red flag record"}]}, 200
 
     def delete(self, id):
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
+        new_incidents = incidents_Schema.dump(incidents).data
+        for incident in new_incidents:
             if incident['id'] == id:
-                incident = incident_list[id-1]
-                incident_list.remove(incident)
+                new_incident = incident
+        if len(new_incident) == 0:
+            abort(404)
+        for item in incidents:
+            if incident_Schema.dump(item).data == new_incident:
+                incidents.remove(item)
+        return {'status': 200, 'data': [{'record': marshal(new_incident, record_fields), "message": "deleted a red flag record"}]}, 200
         
-                result = incident_Schema.dump(incident).data
-
-        
-                return jsonify({"Status": 200, "data": [{"id" : result['id'], "message" : "deleted a red flag record" }]})
-            
-        return {'status': 404, 'data': [{"message" : "red flag record not found"}]}, 404
-        
-        
+       
         
         
