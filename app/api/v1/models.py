@@ -7,7 +7,7 @@ import uuid
 incidents = [
     {
         "id": 1,
-        "createdOn": dt.datetime.now,
+        "createdOn": "some date",
         "createdBy": "Valerie Rono",
         "type_of_incident": "RedFlag",
         "location": "coordinates",
@@ -18,7 +18,7 @@ incidents = [
     },
     {
         "id": 2,
-        "createdOn": dt.datetime.now,
+        "createdOn": "some date",
         "createdBy": "Valerie Rono",
         "type_of_incident": "RedFlag",
         "location": "coordinates",
@@ -32,8 +32,8 @@ incidents = [
 class Incidents():
     def __init__(self, createdBy, type_of_incident, location, 
                     images, videos, comment):
-        self.id = int(uuid.uuid1())
-        self.createdOn = fields.DateTime()
+        self.id = incidents[-1]['id'] + 1
+        self.createdOn = dt.datetime.now()
         self.createdBy = createdBy
         self.type_of_incident = type_of_incident
         self.location = location
@@ -51,6 +51,14 @@ record_parser.add_argument('images', required=True, help='please provide input',
 record_parser.add_argument('videos', required=True, help='please provide input', type=str, default='', location='json')
 record_parser.add_argument('comment', required=True, help='please comment', type=str, location='json')
 
+edit_parser = reqparse.RequestParser()
+edit_parser.add_argument('createdBy', type=str, location='json')
+edit_parser.add_argument('type_of_incident', type=str, default='', location='json')
+edit_parser.add_argument('location', type=str, location='json')
+edit_parser.add_argument('images', type=str, location='json')
+edit_parser.add_argument('videos', type=str, default='', location='json')
+edit_parser.add_argument('comment', type=str, location='json')
+
 record_fields = {
     "id": fields.Integer,
     "createdOn": fields.String,
@@ -61,6 +69,6 @@ record_fields = {
     "images": fields.String,
     "videos": fields.String,
     "comment": fields.String,
-    "uri": fields.Url('api-v1.incident')
+    "uri": fields.Url('api-v1.myincident')
 }
 
