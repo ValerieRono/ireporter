@@ -76,8 +76,5 @@ class TestRequests(BaseTestCase):
         response1 = self.client.post('api/v1/incidents',
                                 data=json.dumps(self.no_input),
                                 headers={'content-type': "application/json"})
-        response2 = self.client.put('api/v1/incidents/2',
-                                data=json.dumps(self.no_input),
-                                headers={'content-type': "application/json"})
         self.assertEqual(response1.status_code, 400)
-        self.assertEqual(response2.status_code, 400)
+        
