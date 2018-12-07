@@ -22,18 +22,7 @@ class BaseTestCase(unittest.TestCase):
         "images" : "file path", 
         "videos" : "file path",
         "comment" : "traffic police bribery"
-    },
-    {
-        "id": 2,
-        "createdOn" : dt.datetime.now,  
-        "createdBy" : "Valerie Rono", 
-        "type_of_incident" : "RedFlag",
-        "location" : "coordinates",
-        "status": "resolved",
-        "images" : "file path", 
-        "videos" : "file path",
-        "comment" : "traffic police bribery"
-    }]
+        }]
         
 
         self.incident = { 
@@ -55,11 +44,11 @@ class BaseTestCase(unittest.TestCase):
             "videos" : "file path",
             "comment" : "power outage"
         }
-        self.update_incident_under_draft = { 
+        self.update_incident_under_pending = { 
             "createdBy" : "Valerie Rono", 
             "type_of_incident" : "RedFlag",
             "location" : "coordinates",
-            "status": "draft",
+            "status": "pending",
             "images" : "file path", 
             "videos" : "file path",
             "comment" : "power outage"

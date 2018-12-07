@@ -60,11 +60,9 @@ class TestRequests(BaseTestCase):
     def test_uneditable_record(self):
         """Test for modifying a record whose status is pending"""
         response = self.client.put('api/v1/incidents/1',
-                                data=json.dumps(self.update_incident_under_draft),
+                                data=json.dumps(self.update_incident_under_pending),
                                 headers={'content-type': "application/json"})
         self.assertEqual(response.status_code, 404)
-        result = json.loads(response.data)
-        self.assertEqual(result['data'][0]["message"], 'cannot edit record')
 
         
     def test_user_delete_incident(self):
@@ -81,9 +79,5 @@ class TestRequests(BaseTestCase):
         response2 = self.client.put('api/v1/incidents/2',
                                 data=json.dumps(self.no_input),
                                 headers={'content-type': "application/json"})
-        self.assertEqual(response1.status_code, 404)
-        result1 = json.loads(response1.data)
-        self.assertEqual(result1["message"], 'no input data provided')
-        self.assertEqual(response2.status_code, 404)
-        result2 = json.loads(response2.data)
-        self.assertEqual(result2["message"], 'no input data provided')
+        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response2.status_code, 400)
