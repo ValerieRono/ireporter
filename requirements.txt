@@ -6,6 +6,8 @@ backports.functools-lru-cache==1.5
 Click==7.0
 configparser==3.5.0
 coverage==4.5.2
+codecov
+coveralls
 enum34==1.1.6
 Flask==1.0.2
 flask-marshmallow==0.9.0
