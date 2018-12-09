@@ -1,59 +1,13 @@
-from marshmallow import Schema, fields, validate
+from flask import Flask
+from flask_restful import fields, reqparse
 import datetime as dt
 import uuid
 
 
-# incident list
-incident_list = [
-    {
-        "id": 1,
-        "createdOn": dt.datetime.now,
-        "createdBy": "Valerie Rono",
-        "type_of_incident": "RedFlag",
-        "location": "coordinates",
-        "status": "pending",
-        "images": "file path",
-        "videos": "file path",
-        "comment": "traffic police bribery"
-    },
-    {
-        "id": 2,
-        "createdOn": dt.datetime.now,
-        "createdBy": "Valerie Rono",
-        "type_of_incident": "RedFlag",
-        "location": "coordinates",
-        "status": "draft",
-        "images": "file path",
-        "videos": "file path",
-        "comment": "traffic police bribery"
-    }
-]
-
-# create schema
-
-
-class IncidentSchema(Schema):
-    id = fields.Int()
-    createdOn = fields.DateTime()
-    createdBy = fields.Str()
-    type_of_incident = fields.Str()
-    location = fields.Str()
-    status = fields.Str()
-    images = fields.Str()
-    videos = fields.Str()
-    comment = fields.Str()
-
-
-incident_Schema = IncidentSchema()
-incidents_Schema = IncidentSchema(many=True)
-
-# basic incident model
-
-
-class Incident(object):
-    def __init__(self, createdBy, type_of_incident, location, images, videos, comment):
-        incidents = incidents_Schema.dump(incident_list).data
-        self.id = incidents[-1]['id'] + 1
+class Incidents():
+    def __init__(self, createdBy, type_of_incident, location,
+                 images, videos, comment):
+        self.id = int(uuid.uuid1())
         self.createdOn = dt.datetime.now
         self.createdBy = createdBy
         self.type_of_incident = type_of_incident
@@ -62,6 +16,33 @@ class Incident(object):
         self.images = images
         self.videos = videos
         self.comment = comment
+    
+record_parser = reqparse.RequestParser()
+record_parser.add_argument('createdBy', required=True, help='please provide input', type=str, location='json')
+record_parser.add_argument('type_of_incident', required=True, help='please provide input', type=str, default='', location='json')
+record_parser.add_argument('location', required=True, help='please provide input', type=str, location='json')
+record_parser.add_argument('images', required=True, help='please provide input', type=str, location='json')
+record_parser.add_argument('videos', required=True, help='please provide input', type=str, default='', location='json')
+record_parser.add_argument('comment', required=True, help='please comment', type=str, location='json')
 
-    def __repr__(self):
-        return '<Incident(comment={self.comment!r})>'.format(self=self)
+edit_parser = reqparse.RequestParser()
+edit_parser.add_argument('createdBy', type=str, location='json')
+edit_parser.add_argument('type_of_incident', type=str, default='', location='json')
+edit_parser.add_argument('location', type=str, location='json')
+edit_parser.add_argument('images', type=str, location='json')
+edit_parser.add_argument('videos', type=str, default='', location='json')
+edit_parser.add_argument('comment', type=str, location='json')
+
+
+record_fields = {
+    "id": fields.Integer,
+    "createdBy": fields.String,
+    "createdOn": fields.String,
+    "type_of_incident": fields.String,
+    "location": fields.String,
+    "status": fields.String,
+    "images": fields.String,
+    "videos": fields.String,
+    "comment": fields.String,
+    "uri": fields.Url('api-v1.myincident')
+}
