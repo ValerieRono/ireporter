@@ -105,7 +105,7 @@ class MyIncident(Resource):
             videos = videos
         )
         result = marshal(record, record_fields)
-        return {"status": 200, "data": [{"incidents": result, "message": "successfully fetched all records"}]}, 200
+        return {"status": 200, "data": [{"incidents": result, "message": "successfully fetched record"}]}, 200
 
     def put(self, id):
         data = edit_parser.parse_args()
@@ -114,13 +114,13 @@ class MyIncident(Resource):
             abort(400)
         for key in data.keys():
             if data[key]:
-                columns = ["createdBy", "type_of_incident", "comment", "location", "images", "videos"]
-                for column in columns:
-                    curr = self.db.cursor()
-                    #import pdb; pdb.set_trace()
-                    curr.execute("""UPDATE incidents SET {0} = '{1}' WHERE incidents_id = '{2}'""".format(column, data[key], id, ))
-                    #import pdb; pdb.set_trace()
-                    self.db.commit()
+                curr = self.db.cursor()
+                #import pdb; pdb.set_trace()
+                curr.execute("""UPDATE incidents SET {0} = '{1}' WHERE incidents_id = '{2}'""".format(key, data[key], id, ))
+                #import pdb; pdb.set_trace()
+                self.db.commit()
+
+        return {"status": 200, "data": [{"message": "successfully edited record"}]}, 200
 
     def delete(self, id):
         curr = self.db.cursor() 
