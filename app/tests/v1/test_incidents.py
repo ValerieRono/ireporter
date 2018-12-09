@@ -32,49 +32,67 @@ class TestRequests(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]["message"], 'successfully fetched all records')
-        
-        
 
     def test_get_specific_incident(self):
         """Test for viewing a particular redflag"""
         #existing redflag
-        response = self.client.get('api/v1/incidents/1')
+        response = self.client.post('api/v1/incidents', data=json.dumps(
+            self.incident), headers={'content-type': "application/json"})
+        self.assertEqual(response.status_code, 201)
+        response = self.client.get('api/v1/incidents/1', headers={'content-type' : 'application/json'})
         self.assertEqual(response.status_code, 200)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]["message"], 'successfully fetched record')
     
     def test_get_incident_not_found(self):
         """Test for viewing a redflag that does not exist"""
         #redflag does not exist
         response = self.client.get('api/v1/incidents/20')
         self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]["message"], 'record not found')
+
+    def test_edit_incident_not_found(self):
+        """Test for editing a redflag that does not exist"""
+        #redflag does not exist
+        response = self.client.put('api/v1/incidents/20')
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]["message"], 'record not found')
+
+    def test_delete_incident_not_found(self):
+        """Test for viewing a redflag that does not exist"""
+        #redflag does not exist
+        response = self.client.delete('api/v1/incidents/20')
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]["message"], 'record not found')
 
 
     def test_edit_an_incident(self): 
         """Test for modifying a redflag """
-        response = self.client.put('api/v1/incidents/2',
+        response = self.client.post('api/v1/incidents', data=json.dumps(
+            self.incident), headers={'content-type': "application/json"})
+        self.assertEqual(response.status_code, 201)
+        response = self.client.put('api/v1/incidents/1',
                                 data=json.dumps(self.update_incident),
                                 headers={'content-type': "application/json"})
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]["message"], 'updated red flag record')
 
-    def test_uneditable_record(self):
-        """Test for modifying a record whose status is pending"""
-        response = self.client.put('api/v1/incidents/1',
-                                data=json.dumps(self.update_incident_under_pending),
-                                headers={'content-type': "application/json"})
-        self.assertEqual(response.status_code, 404)
-
-        
     def test_user_delete_incident(self):
         """Test for deleting a redflag"""
         response = self.client.delete('api/v1/incidents/2')
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]["message"], 'deleted a red flag record')
-
+        
     def test_no_input(self):
-        response1 = self.client.post('api/v1/incidents',
+        response = self.client.post('api/v1/incidents',
                                 data=json.dumps(self.no_input),
                                 headers={'content-type': "application/json"})
-        self.assertEqual(response1.status_code, 400)
+        self.assertEqual(response.status_code, 400)
         
+    #uneditable record
+    #post with invalid data
