@@ -1,8 +1,24 @@
-from flask import Flask, jsonify, abort, make_response, request
-from flask_restful import Api, Resource, fields
+from flask import Flask, json, jsonify, abort, make_response
+from flask_restful import Api, Resource, reqparse, marshal
+from marshmallow import Schema, fields
 
 # local import
-from app.api.v2.incidents.models import Incident, IncidentSchema, incident_list
+from app.api.v2.incidents.models import record_fields, record_parser, Incidents, edit_parser
+
+from app.database_config import init_db
+
+# for serialization
+class IncidentSchema(Schema):
+    id = fields.Int()
+    createdBy = fields.Str()
+    createdOn = fields.DateTime()
+    type_of_incident = fields.Str()
+    location = fields.Str()
+    status = fields.Str()
+    images = fields.Str()
+    videos = fields.Str()
+    comment = fields.Str()
+
 
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
@@ -11,86 +27,104 @@ incidents_Schema = IncidentSchema(many=True)
 class MyIncidents(Resource):
     def __init__(self):
         super(MyIncidents, self).__init__()
+        self.parser = record_parser
+        self.db = init_db()
 
     def get(self):
-        incidents = incidents_Schema.dump(incident_list).data
-        return jsonify({"status": 200, "data": [{"incidents": incidents, "message": "successfully fetched all records"}]})
+        #fetch data
+        curr = self.db.cursor()
+        query = """SELECT incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos FROM incidents"""
+        curr.execute(query)
+        data = curr.fetchall()
+        response = []
+        
+        for i, items in enumerate(data):
+            incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = items
+            record = dict (
+                id = int(incidents_id),
+                createdOn = str(createdOn),
+                createdBy = createdBy,
+                type_of_incident = type_of_incident,
+                status = status,
+                comment = comment,
+                location = location,
+                images = images,
+                videos = videos
+            )
+            result = marshal(record, record_fields)
+            response.append(result)
+
+        return {"status": 200, "data": [{"incidents": response, "message": "successfully fetched all records"}]}, 200
 
     def post(self):
-        json_data = request.get_json(force=True)
-        if not json_data:
-            return {'status': 200, 'message': 'no input data provided'}, 404
-        # Validate and deserialize input
-        data, errors = incident_Schema.dump(json_data)
-        if errors:
-            return {"status": 422, "data": errors}, 422
-        keys = data.keys()
+        args = self.parser.parse_args()
+        keys = args.keys()
         for key in keys:
-            if not data[key]:
+            if not args[key]:
                 return {"status": 404, "data": [{"message": "please comment on the incident you would like to report"}]}, 404
-        new_incident = Incident(
-            createdBy=data['createdBy'],
-            type_of_incident=data['type_of_incident'],
-            location=data['location'],
-            images=data['images'],
-            videos=data['videos'],
-            comment=data['comment']
+        incident = Incidents(
+            createdBy=args['createdBy'],
+            type_of_incident=args['type_of_incident'],
+            location=args['location'],
+            images=args['images'],
+            videos=args['videos'],
+            comment=args['comment']
         )
-
-        incident_list.append(new_incident)
-        result = incident_Schema.dump(new_incident).data
-
-        # return resp
-        return {'status': 201, 'data': [{"record": result, "message": "created red flag record"}]}, 201
+        new_incident = incident_Schema.dump(incident).data
+        query = """INSERT INTO incidents (incidents_id, createdBy, type_of_incident, status, comment, location, images, videos) 
+                    VALUES (%(id)s, %(createdBy)s, %(type_of_incident)s, %(status)s, %(comment)s, %(location)s, %(images)s, %(videos)s);"""
+        curr = self.db.cursor()
+        curr.execute(query, new_incident)
+        self.db.commit()
+        return {'status': 201, 'data': [{"record": marshal(incident, record_fields), "message": "created red flag record"}]}, 201
 
 
 class MyIncident(Resource):
     def __init__(self):
         super(MyIncident, self).__init__()
+        self.parser = record_parser
+        self.db = init_db()
 
     def get(self, id):
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
-            if incident['id'] == id:
-                incidents = incidents_Schema.dump(incident_list).data
-                incident = [
-                    incident for incident in incidents if incident['id'] == id]
-                return jsonify({"status": 200, "data": [incident]})
-
-        return {'status': 404, 'data': [{"message": "red flag record not found"}]}, 404
+        #fetch data
+        curr = self.db.cursor()
+        query = """SELECT incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos FROM incidents WHERE incidents_id = {0}""".format(id)
+        curr.execute(query)
+        data = curr.fetchone()
+    
+        incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = data
+        record = dict (
+            id = int(incidents_id),
+            createdOn = str(createdOn),
+            createdBy = createdBy,
+            type_of_incident = type_of_incident,
+            status = status,
+            comment = comment,
+            location = location,
+            images = images,
+            videos = videos
+        )
+        result = marshal(record, record_fields)
+        return {"status": 200, "data": [{"incidents": result, "message": "successfully fetched all records"}]}, 200
 
     def put(self, id):
-        json_data = request.get_json(force=True)
-        if not json_data:
-            return {'status': 404, 'message': 'no input data provided'}, 404
-        # Validate and deserialize input
-        data = incident_Schema.dump(json_data).data
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
-            if incident['id'] == id:
-                if incident['status'] != "draft":
-                    return {'status': 404, 'data': [{"message": "cannot edit record"}]}, 404
-
-                for key in data.keys():
-                    if data[key] is not None:
-                        incident[key] = data[key]
-
-                    updated_incident = incident_Schema.load(incident).data
-                    incident_list[id-1] = updated_incident
-
-                    result = incident_Schema.dump(incident).data
-
-        return jsonify({'status': 200, 'data': [{"record": result, "message": "updated red flag record"}]})
+        data = edit_parser.parse_args()
+        #import pdb; pdb.set_trace()
+        if not data:
+            abort(400)
+        for key in data.keys():
+            if data[key]:
+                columns = ["createdBy", "type_of_incident", "comment", "location", "images", "videos"]
+                for column in columns:
+                    curr = self.db.cursor()
+                    #import pdb; pdb.set_trace()
+                    curr.execute("""UPDATE incidents SET {0} = '{1}' WHERE incidents_id = '{2}'""".format(column, data[key], id, ))
+                    #import pdb; pdb.set_trace()
+                    self.db.commit()
 
     def delete(self, id):
-        incidents = incidents_Schema.dump(incident_list).data
-        for incident in incidents:
-            if incident['id'] == id:
-                incident = incident_list[id-1]
-                incident_list.remove(incident)
-
-                result = incident_Schema.dump(incident).data
-
-                return jsonify({"Status": 200, "data": [{"id": result['id'], "message": "deleted a red flag record"}]})
-
-        return {'status': 404, 'data': [{"message": "red flag record not found"}]}, 404
+        curr = self.db.cursor() 
+        curr.execute("""DELETE FROM incidents WHERE incidents_id = %s""", (id,))
+        self.db.commit()
+        
+        return {"status": 200, "data": [{"message": "successfully deleted record"}]}, 200
