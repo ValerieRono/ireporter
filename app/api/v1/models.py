@@ -1,8 +1,6 @@
 from flask import Flask
 from flask_restful import fields, reqparse
-import datetime as dt
-import uuid
-
+import datetime
 
 incidents = []
 
@@ -15,7 +13,7 @@ class Incidents():
     def __init__(self, createdBy, type_of_incident, location, 
                     images, videos, comment):
         self.id = generateId()
-        self.createdOn = dt.datetime.now()
+        self.createdOn = datetime.datetime.now()
         self.createdBy = createdBy
         self.type_of_incident = type_of_incident
         self.location = location
@@ -23,9 +21,6 @@ class Incidents():
         self.images = images
         self.videos = videos
         self.comment = comment
-
-
-
 
 record_parser = reqparse.RequestParser()
 record_parser.add_argument('createdBy', required=True, help='please provide input', type=str, location='json')

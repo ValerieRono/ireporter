@@ -5,7 +5,7 @@ from marshmallow import Schema, fields
 # local import
 from app.api.v1.models import record_fields, incidents, record_parser, Incidents, edit_parser
 
-#for serialization 
+# for serialization 
 class IncidentSchema(Schema):
     id = fields.Int()
     createdOn = fields.Str()
@@ -26,6 +26,8 @@ class MyIncidents(Resource):
         self.parser = record_parser
 
     def get(self):
+        if len(incidents) == 0:
+            return {"status": 404, "data": [{"message": "no records found"}]}, 404
         result = [marshal(incident, record_fields) for incident in incidents]
         return {"status": 200, "data": [{"incidents": result, "message": "successfully fetched all records"}]}, 200
         
@@ -35,7 +37,7 @@ class MyIncidents(Resource):
         keys = args.keys()
         for key in keys:
             if not args[key]:
-                return {"status": 404, "data": [{"message": "please comment on the incident you would like to report"}]}, 404
+                return {"status": 400, "data": [{"message": "bad request"}]}, 400
         incident = Incidents(
             createdBy = args['createdBy'],
             type_of_incident = args['type_of_incident'],
@@ -69,7 +71,7 @@ class MyIncident(Resource):
         if len(incident) == 0:
             return {"status": 404, "data": [{"message": "record not found"}]}, 404
         if incident[0]['status'] != "draft":
-                    return {'status': 404, 'data': [{"message" : "cannot edit record"}]}, 404
+                    return {'status': 400, 'data': [{"message" : "cannot edit record"}]}, 400
 
         args = edit_parser.parse_args()
         for key in args.keys():
