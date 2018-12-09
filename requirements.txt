@@ -24,8 +24,10 @@ pathlib2==2.3.3
 pluggy==0.8.0
 py==1.7.0
 pylint==1.9.3
+psycopg2==2.7.4
 pytest==4.0.1
 pytest-cov==2.6.0
+python-dotenv==0.10.0
 pytz==2018.7
 scandir==1.9.0
 singledispatch==3.4.0.3

@@ -6,10 +6,10 @@ from ... import create_app
 
 
 class BaseTestCase(unittest.TestCase):
-    """ set up configurations for the test environment"""
+    """ set up configurations for the test environment """
     @classmethod
     def setUpClass(self):
-        """set up app configuration"""
+        """ set up app configuration """
         self.app = create_app(config_name="testing")
         self.client = self.app.test_client()
         self.data = [{
