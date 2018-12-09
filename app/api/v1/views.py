@@ -59,48 +59,38 @@ class MyIncident(Resource):
         new_incidents = incidents_Schema.dump(incidents).data
         incident = [incident for incident in new_incidents if incident['id'] == id]
         if len(incident) == 0:
-            abort(404)
-        return {
-            'status': 200,
-            'data': marshal(incident[0], record_fields)
-        }
-
+            return {"status": 404, "data": [{"message": "record not found"}]}, 404
+        result = marshal(incident[0], record_fields)
+        return {"status": 200, "data": [{"incident": result, "message": "successfully fetched record"}]}, 200
+        
     def put(self, id):
         new_incidents = incidents_Schema.dump(incidents).data
-        args = edit_parser.parse_args()
-        if not args:
-            abort(400)
-
-        for incident in new_incidents:
-            if incident['id'] == id:
-                if incident['status'] != "draft":
+        incident = [incident for incident in new_incidents if incident['id'] == id]
+        if len(incident) == 0:
+            return {"status": 404, "data": [{"message": "record not found"}]}, 404
+        if incident[0]['status'] != "draft":
                     return {'status': 404, 'data': [{"message" : "cannot edit record"}]}, 404
-                new_incident = incident
-                for key in args.keys():
-                    if args[key] is not None:
-                        new_incident[key] = args[key] 
 
-                    updated_incident = incident_Schema.load(incident).data
-                    incidents[id-1] = updated_incident
+        args = edit_parser.parse_args()
+        for key in args.keys():
+            if args[key]:
+                incident[0][key] = args[key]        
 
-                    result = incident_Schema.dump(incident).data
+        updated_incident = incident_Schema.load(incident[0]).data
+        incidents[id-1] = updated_incident
 
-                    
-                
-
+        result = incident_Schema.dump(incident[0]).data
         return {'status': 200, 'data': [{'record': marshal(result, record_fields), "message": "updated red flag record"}]}, 200
 
     def delete(self, id):
         new_incidents = incidents_Schema.dump(incidents).data
-        for incident in new_incidents:
-            if incident['id'] == id:
-                new_incident = incident
-        if len(new_incident) == 0:
-            abort(404)
+        incident = [incident for incident in new_incidents if incident['id'] == id]
+        if len(incident) == 0:
+            return {"status": 404, "data": [{"message": "record not found"}]}, 404
         for item in incidents:
-            if incident_Schema.dump(item).data == new_incident:
+            if incident_Schema.dump(item).data == incident[0]:
                 incidents.remove(item)
-        return {'status': 200, 'data': [{'record': marshal(new_incident, record_fields), "message": "deleted a red flag record"}]}, 200
+        return {'status': 200, 'data': [{'record': marshal(incident[0], record_fields), "message": "deleted a red flag record"}]}, 200
         
        
         

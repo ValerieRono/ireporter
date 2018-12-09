@@ -4,35 +4,17 @@ import datetime as dt
 import uuid
 
 
-incidents = [
-    {
-        "id": 1,
-        "createdOn": "some date",
-        "createdBy": "Valerie Rono",
-        "type_of_incident": "RedFlag",
-        "location": "coordinates",
-        "status": "pending",
-        "images": "file path",
-        "videos": "file path",
-        "comment": "traffic police bribery"
-    },
-    {
-        "id": 2,
-        "createdOn": "some date",
-        "createdBy": "Valerie Rono",
-        "type_of_incident": "RedFlag",
-        "location": "coordinates",
-        "status": "draft",
-        "images": "file path",
-        "videos": "file path",
-        "comment": "traffic police bribery"
-    }
-]
+incidents = []
+
+def generateId():
+    if len(incidents) > 0:
+        return incidents[-1]['id'] + 1
+    return 1
 
 class Incidents():
     def __init__(self, createdBy, type_of_incident, location, 
                     images, videos, comment):
-        self.id = incidents[-1]['id'] + 1
+        self.id = generateId()
         self.createdOn = dt.datetime.now()
         self.createdBy = createdBy
         self.type_of_incident = type_of_incident
@@ -41,6 +23,8 @@ class Incidents():
         self.images = images
         self.videos = videos
         self.comment = comment
+
+
 
 
 record_parser = reqparse.RequestParser()
