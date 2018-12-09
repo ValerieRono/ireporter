@@ -37,7 +37,7 @@ http://localhost:5000
 ## *The api has endpoints for:*
 
 | METHOD        | ENDPOINT                    | DESCRIPTION                                        | 
-| --------------|:---------------------------:| :-------------------------------------------------:| 
+| --------------|:---------------------------:| ---------------------------------------------------| 
 | POST          | /api/v1/incidents           | Allows user to create a red flag record            |
 | GET           | /api/v1/incidents/          | Allows user to view all red flag records           |
 | GET           | /api/v1/incidents/<int:id>  | Allows user to view a specific red flag record     | 
