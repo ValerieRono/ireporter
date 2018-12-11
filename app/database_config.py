@@ -1,10 +1,11 @@
 import psycopg2
 import os
+from flask import current_app
 
 
 url = "dbname='ireporter' host='localhost' port='5432' user='postgres' password='123abc'"
-url_test = "dbname='ireporter_test' host='localhost' port='5432' user='postgres' password='123abc'"
-#url = os.getenv('DATABASE_URL')
+#url_test = "dbname='ireporter_test' host='localhost' port='5432' user='postgres' password='123abc'"
+#url = current_app.config.get('DATABASE_URL')
 
 
 def connection(url):

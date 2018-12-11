@@ -16,7 +16,7 @@ class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""
     TESTING = True
     DEBUG = True
-    DATABASE_URL = #set databse url for testing here
+    # DATABASE_URL = #set databse url for testing here
   
 
 class StagingConfig(Config):
