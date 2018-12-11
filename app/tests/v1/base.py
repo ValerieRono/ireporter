@@ -1,14 +1,13 @@
 """ base class for all the tests"""
 import unittest
-import datetime as dt
 
 from ... import create_app
 
-
 class BaseTestCase(unittest.TestCase):
+
     """ set up configurations for the test environment """
-    @classmethod
-    def setUpClass(self):
+
+    def setUp(self):
         """ set up app configuration """
         self.app = create_app(config_name="testing")
         self.client = self.app.test_client()
@@ -26,24 +25,18 @@ class BaseTestCase(unittest.TestCase):
         }]
 
         self.incident = {
-            "createdBy": "Valerie Rono",
-            "type_of_incident": "RedFlag",
-            "location": "coordinates",
-            "status": "rejected",
-            "images": "file path",
-            "videos": "file path",
-            "comment": "traffic police bribery"
+            "createdBy": "valerie",
+            "type_of_incident": "Redflag",
+            "location": "rongai",
+            "images": "blah",
+            "videos": "blah",
+            "comment": "wow"
         }
 
         self.update_incident = {
-            "createdBy": "Valerie Rono",
-            "type_of_incident": "RedFlag",
-            "location": "coordinates",
-            "status": "draft",
-            "images": "file path",
-            "videos": "file path",
-            "comment": "power outage"
+            "createdBy": "Someone else",
         }
+
         self.update_incident_under_pending = {
             "createdBy": "Valerie Rono",
             "type_of_incident": "RedFlag",
