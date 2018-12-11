@@ -1,10 +1,10 @@
-from flask import Flask, json, jsonify, abort, make_response
-from flask_restful import Api, Resource, reqparse, marshal, inputs
+from flask import abort
+from flask_restful import Resource, reqparse, marshal, inputs
 from marshmallow import Schema, fields
-import re
 
 # local import
-from app.api.v2.incidents.models import Incidents, ManipulateDbase, record_fields
+from app.api.v2.incidents.models import Incidents, ManipulateDbase
+from app.api.v2.incidents.models import record_fields
 
 record_parser = reqparse.RequestParser()
 record_parser.add_argument('createdBy', required=True, help='please provide input', type=int, location='json')
@@ -46,7 +46,6 @@ class MyIncidents(Resource):
         super(MyIncidents, self).__init__()
         self.parser = record_parser
         self.manipulate = ManipulateDbase()
-       
 
     def get(self):
         response = self.manipulate.fetch()

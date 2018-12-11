@@ -1,6 +1,6 @@
 """ v2 """
 from flask import Blueprint
-from flask_restful import Api, Resource 
+from flask_restful import Api
 
 # local import
 from app.api.v2.incidents.views import MyIncidents, MyIncident
