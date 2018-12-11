@@ -1,20 +1,21 @@
 from flask import Flask, json, jsonify, abort, make_response
-from flask_restful import Api, Resource, reqparse, marshal
+from flask_restful import Api, Resource, reqparse, marshal, inputs
 from marshmallow import Schema, fields
+import re
 
 # local import
 from app.api.v2.incidents.models import Incidents, ManipulateDbase, record_fields
 
 record_parser = reqparse.RequestParser()
-record_parser.add_argument('createdBy', required=True, help='please provide input', type=str, location='json')
-record_parser.add_argument('type_of_incident', required=True, help='please provide input', type=str, default='', location='json')
+record_parser.add_argument('createdBy', required=True, help='please provide input', type=int, location='json')
+record_parser.add_argument('type_of_incident', required=True, help='type can only be Redflag or Intervention', type=inputs.regex(r'^\b(Redflag|intervention)\b$'), default='', location='json')
 record_parser.add_argument('location', required=True, help='please provide input', type=str, location='json')
 record_parser.add_argument('images', required=True, help='please provide input', type=str, location='json')
 record_parser.add_argument('videos', required=True, help='please provide input', type=str, default='', location='json')
-record_parser.add_argument('comment', required=True, help='please comment', type=str, location='json')
+record_parser.add_argument('comment', required=True, help='please comment', type=inputs.regex(r'^(?!\s*$).+'), location='json')
 
 edit_parser = reqparse.RequestParser()
-edit_parser.add_argument('createdBy', type=str, location='json')
+edit_parser.add_argument('createdBy', type=int, location='json')
 edit_parser.add_argument('type_of_incident', type=str, default='', location='json')
 edit_parser.add_argument('location', type=str, location='json')
 edit_parser.add_argument('images', type=str, location='json')
@@ -26,7 +27,7 @@ edit_parser.add_argument('comment', type=str, location='json')
 # for serialization
 class IncidentSchema(Schema):
     id = fields.Int()
-    createdBy = fields.Str()
+    createdBy = fields.Int()
     createdOn = fields.DateTime()
     type_of_incident = fields.Str()
     location = fields.Str()

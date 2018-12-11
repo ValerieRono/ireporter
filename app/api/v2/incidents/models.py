@@ -94,7 +94,7 @@ class ManipulateDbase():
 record_fields = {
     "id": fields.Integer,
     "createdOn": fields.String,
-    "createdBy": fields.String,
+    "createdBy": fields.Integer,
     "type_of_incident": fields.String,
     "location": fields.String,
     "status": fields.String,
