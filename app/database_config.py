@@ -1,12 +1,10 @@
 import psycopg2
-import os
-from flask import current_app
+# import os
+# from flask import current_app
 
-
+# name = current_app.config['DB_NAME']
+# url = "dbname={0} host='localhost' port='5432' user='postgres' password='123abc'".format(name)
 url = "dbname='ireporter' host='localhost' port='5432' user='postgres' password='123abc'"
-#url_test = "dbname='ireporter_test' host='localhost' port='5432' user='postgres' password='123abc'"
-#url = current_app.config.get('DATABASE_URL')
-
 
 def connection(url):
     conn = psycopg2.connect(url)
@@ -24,9 +22,7 @@ def create_tables():
     for query in queries:
         curr.execute(query)
     conn.commit()
-    #curr = conn.cursor
-    #queries = tables()
-
+    
 
 def destroy_tables():
     pass
@@ -41,7 +37,7 @@ def tables():
         username character varying(50) NOT NULL,
         email character varying(50),
         phonenumber character varying(50),
-        password_hash character varying(50) NOT NULL,
+        password character varying(50) NOT NULL,
         registered timestamp with time zone DEFAULT ('now'::text)::date NOT NULL,
         isAdmin boolean NOT NULL
     )"""

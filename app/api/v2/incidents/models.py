@@ -1,5 +1,4 @@
-from flask import Flask
-from flask_restful import reqparse, fields, marshal
+from flask_restful import fields, marshal
 import datetime
 import uuid
 
@@ -32,16 +31,16 @@ class ManipulateDbase():
         
         for i, items in enumerate(data):
             incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = items
-            record = dict (
-                id = int(incidents_id),
-                createdOn = str(createdOn),
-                createdBy = createdBy,
-                type_of_incident = type_of_incident,
-                status = status,
-                comment = comment,
-                location = location,
-                images = images,
-                videos = videos
+            record = dict(
+                id=int(incidents_id),
+                createdOn=str(createdOn),
+                createdBy=createdBy,
+                type_of_incident=type_of_incident,
+                status=status,
+                comment=comment,
+                location=location,
+                images=images,
+                videos=videos
             )
             result = marshal(record, record_fields)
             response.append(result)
@@ -50,8 +49,12 @@ class ManipulateDbase():
 
     def save(self, record_to_add):
         # save data
-        query = """INSERT INTO incidents (incidents_id, createdBy, type_of_incident, status, comment, location, images, videos) 
-                    VALUES (%(id)s, %(createdBy)s, %(type_of_incident)s, %(status)s, %(comment)s, %(location)s, %(images)s, %(videos)s);"""
+        query = """INSERT INTO incidents
+                    (incidents_id, createdBy, type_of_incident,
+                    status, comment, location, images, videos) 
+                    VALUES (%(id)s, %(createdBy)s, %(type_of_incident)s,
+                    %(status)s, %(comment)s, %(location)s, %(images)s,
+                    %(videos)s);"""
         curr = self.db.cursor()
         curr.execute(query, record_to_add)
         self.db.commit()
@@ -64,16 +67,16 @@ class ManipulateDbase():
         data = curr.fetchone()
     
         incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = data
-        record = dict (
-            id = int(incidents_id),
-            createdOn = str(createdOn),
-            createdBy = createdBy,
-            type_of_incident = type_of_incident,
-            status = status,
-            comment = comment,
-            location = location,
-            images = images,
-            videos = videos
+        record = dict(
+            id=int(incidents_id),
+            createdOn=str(createdOn),
+            createdBy=createdBy,
+            type_of_incident=type_of_incident,
+            status=status,
+            comment=comment,
+            location=location,
+            images=images,
+            videos=videos
         )
         result = marshal(record, record_fields)
         return result
@@ -82,12 +85,16 @@ class ManipulateDbase():
         for key in data_to_edit.keys():
             if data_to_edit[key]:
                 curr = self.db.cursor()
-                curr.execute("""UPDATE incidents SET {0} = '{1}' WHERE incidents_id = '{2}'""".format(key, data_to_edit[key], id, ))
+                curr.execute(
+                    """UPDATE incidents SET {0} = '{1}' WHERE incidents_id = '{2}'""".format(key, data_to_edit[key], id, )
+                )
                 self.db.commit()
 
     def delete(self, id):
         curr = self.db.cursor() 
-        curr.execute("""DELETE FROM incidents WHERE incidents_id = %s""", (id,))
+        curr.execute(
+            """DELETE FROM incidents WHERE incidents_id = %s""", (id,)
+        )
         self.db.commit()
         
     
