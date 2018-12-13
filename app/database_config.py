@@ -14,7 +14,6 @@ def init_db():
     conn = connection(url)
     return conn
 
-
 def create_tables():
     conn = connection(url)
     curr = conn.cursor()
