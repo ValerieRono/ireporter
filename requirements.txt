@@ -31,7 +31,6 @@ mccabe==0.6.1
 more-itertools==4.3.0
 passlib==1.7.1
 pathlib2==2.3.3
-pkg-resources==0.0.0
 pluggy==0.8.0
 psycopg2==2.7.4
 py==1.7.0
