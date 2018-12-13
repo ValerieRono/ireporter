@@ -1,12 +1,14 @@
 import os
 
-
 class Config(object):
     """Parent configuration class."""
     DEBUG = False
     CSRF_ENABLED = True
     SECRET = os.getenv('SECRET')
-    DATABASE_URL = os.getenv('DATABASE_URL')
+    DB_HOST = os.getenv('DB_HOST')
+    DB_USERNAME = os.getenv('DB_USERNAME')
+    DB_PASSWORD = os.getenv('DB_PASSWORD')
+    DB_NAME = os.getenv('DB_NAME')
 
 class DevelopmentConfig(Config):
     """Configurations for Development."""
@@ -16,7 +18,7 @@ class TestingConfig(Config):
     """Configurations for Testing, with a separate test database."""
     TESTING = True
     DEBUG = True
-    # DATABASE_URL = #set databse url for testing here
+    DB_NAME = os.getenv('DB_TEST_NAME')
   
 
 class StagingConfig(Config):
