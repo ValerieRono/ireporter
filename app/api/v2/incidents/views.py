@@ -6,7 +6,7 @@ from marshmallow import Schema, fields
 from app.api.v2.incidents.models import Incidents, ManipulateDbase
 from app.api.v2.incidents.models import record_fields
 
-from app.api.v2.Users.views import token_required
+from app.api.v2.utils import token_required
 
 manipulate = ManipulateDbase()
 
