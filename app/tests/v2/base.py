@@ -20,8 +20,8 @@ class BaseTestCase(unittest.TestCase):
             "othernames": "other",
             "email": "ronovalerie@gmail",
             "phoneNumber": "number",
-            "username": "loki",
-            "password": "abc123"
+            "username": "hella",
+            "password": "badgirl"
         }
         self.sign_up_existing_user = {
             "firstname": "Valerie",
@@ -77,7 +77,7 @@ class BaseTestCase(unittest.TestCase):
             "username": "loki",
             "password": "abc123"
         }
-        self.sign_up_user_wrong_phone_number = {
+        self.sign_up_user_invalid_phone_number = {
             "firstname": "Valerie",
             "lastname": "Rono",
             "othernames": "other",
@@ -85,6 +85,14 @@ class BaseTestCase(unittest.TestCase):
             "phoneNumber": "number",
             "username": "loki",
             "password": "abc123"
+        }
+        self.log_in_user = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_wrong_details = {
+            "username": "hell",
+            "password": "badgirl"
         }
         self.post_incident = {
             "type_of_incident": "Redflag",
