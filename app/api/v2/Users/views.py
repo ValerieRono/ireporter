@@ -1,8 +1,8 @@
-from flask import abort, current_app
-from flask import request, jsonify, make_response
+from flask import abort
+from flask import request
 from flask_restful import Resource, reqparse, marshal, inputs
 from marshmallow import Schema, fields
-from functools import wraps
+
 
 # local import
 from app.api.v2.Users.models import record_fields, Users, ManipulateDbase
@@ -113,30 +113,6 @@ incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
 
 manipulate = ManipulateDbase()
-
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        access = request.headers.get('Authorization')
-        if not access:
-            return jsonify({'message': 'Authorization required!'}), 401
-
-        token = access.split(" ")[1]
-        # ensure token is present
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
-        
-        user = Users.decode_token(token)
-        if isinstance(user, str):
-            return make_response(jsonify({
-                "message": "invalid token",
-                "error": user
-            }), 400)
-
-        return f(user=user, *args, **kwargs)
-       
-    return decorated
 
 
 class MyUsers(Resource):

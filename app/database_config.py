@@ -1,10 +1,11 @@
 import psycopg2
-# import os
+from instance.config import app_config
+import os
 # from flask import current_app
+env = os.getenv('FLASK_CONFIG')
+url = app_config[env].DATABASE_URL
 
-# name = current_app.config['DB_NAME']
-# url = "dbname={0} host='localhost' port='5432' user='postgres' password='123abc'".format(name)
-url = "dbname='ireporter' host='localhost' port='5432' user='postgres' password='123abc'"
+#url = "dbname='ireporter' host='localhost' port='5432' user='postgres' password='123abc'"
 
 def connection(url):
     conn = psycopg2.connect(url)
@@ -13,7 +14,6 @@ def connection(url):
 def init_db():
     conn = connection(url)
     return conn
-
 
 def create_tables():
     conn = connection(url)
@@ -26,7 +26,6 @@ def create_tables():
 
 def destroy_tables():
     pass
-
 
 def tables():
     users_table = """CREATE TABLE IF NOT EXISTS users_table (
