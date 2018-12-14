@@ -113,7 +113,7 @@ class TestRequests(BaseTestCase):
             self.log_in_wrong_details),
             headers={'content-type': "application/json"}
             )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
 
     # def test_get_all_incidents(self):
     #     """Test for viewing all redflags"""
