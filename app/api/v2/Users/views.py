@@ -95,6 +95,19 @@ edit_parser.add_argument(
     location='json'
     )
 
+login_parser = reqparse.RequestParser()
+
+login_parser.add_argument(
+    'username',
+    type=str,
+    location='json'
+)
+login_parser.add_argument(
+    'password',
+    type=str,
+    location='json'
+)
+
 # for serialization
 class IncidentSchema(Schema):
     id = fields.Int()
@@ -172,11 +185,12 @@ class login(Resource):
 
     def post(self):
 
-        username = request.form.get('username')
+        data = login_parser.parse_args()
+        username = data['username']
         user = manipulate.find_by_username(username)
 
         # verify password
-        if not user or not user[1].verify_password(request.form.get('password')):
+        if not user or not user[1].verify_password(data['password']):
             return {
                 'message': 'Invalid email or password, Please try again'
             }, 401

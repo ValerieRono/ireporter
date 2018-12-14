@@ -82,14 +82,38 @@ class TestRequests(BaseTestCase):
             )
         self.assertEqual(response.status_code, 400)
 
-    def test_new_user_wrong_phone_number(self):
+    def test_new_user_invalid_phone_number(self):
         """Test for registering a user, with invalid input data"""
-        # special characters
+        # invalid phone number
         response = self.client.post('api/v2/users', data=json.dumps(
-            self.sign_up_user_wrong_phone_number),
+            self.sign_up_user_invalid_phone_number),
             headers={'content-type': "application/json"}
             )
         self.assertEqual(response.status_code, 400)
+
+    def test_user_log_in(self):
+        """Test for logging in a user, with valid input data"""
+        # correct log in
+        response = self.client.post('api/v2/users', data=json.dumps(
+            self.sign_up_user), headers={'content-type': "application/json"})
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post('api/v2/user', data=json.dumps(
+            self.log_in_user),
+            headers={'content-type': "application/json"}
+            )
+        self.assertEqual(response.status_code, 200)
+
+    def test_user_log_in_wrong_details(self):
+        """Test for logging in a user, with invalid input data"""
+        # incorrect log in
+        response = self.client.post('api/v2/users', data=json.dumps(
+            self.sign_up_user), headers={'content-type': "application/json"})
+        self.assertEqual(response.status_code, 201)
+        response = self.client.post('api/v2/user', data=json.dumps(
+            self.log_in_wrong_details),
+            headers={'content-type': "application/json"}
+            )
+        self.assertEqual(response.status_code, 404)
 
     # def test_get_all_incidents(self):
     #     """Test for viewing all redflags"""
