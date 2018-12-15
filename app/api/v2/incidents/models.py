@@ -1,13 +1,12 @@
 from flask_restful import fields, marshal
 import datetime
-import uuid
 
 from app.database_config import init_db
+
 
 class Incidents():
     def __init__(self, createdBy, type_of_incident, location,
                  images, videos, comment):
-        self.id = int(uuid.uuid1())
         self.createdOn = datetime.datetime.now()
         self.createdBy = createdBy
         self.type_of_incident = type_of_incident
@@ -17,6 +16,7 @@ class Incidents():
         self.videos = videos
         self.comment = comment
 
+
 class ManipulateDbase():
     def __init__(self):
         self.db = init_db()
@@ -24,7 +24,9 @@ class ManipulateDbase():
     def fetch(self):
         # fetch data
         curr = self.db.cursor()
-        query = """SELECT incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos FROM incidents"""
+        query = """SELECT incidents_id, createdOn, createdBy,
+                    type_of_incident, status, comment, location,
+                    images, videos FROM incidents"""
         curr.execute(query)
         data = curr.fetchall()
         response = []
@@ -32,7 +34,7 @@ class ManipulateDbase():
         for i, items in enumerate(data):
             incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = items
             record = dict(
-                id=int(incidents_id),
+                id=incidents_id,
                 createdOn=str(createdOn),
                 createdBy=createdBy,
                 type_of_incident=type_of_incident,
@@ -47,28 +49,46 @@ class ManipulateDbase():
 
         return response
 
-    def save(self, record_to_add):
-        # save data
-        query = """INSERT INTO incidents
-                    (incidents_id, createdBy, type_of_incident,
-                    status, comment, location, images, videos) 
-                    VALUES (%(id)s, %(createdBy)s, %(type_of_incident)s,
-                    %(status)s, %(comment)s, %(location)s, %(images)s,
-                    %(videos)s);"""
+    def fetch_all_own(self, id):
+        # fetch data
         curr = self.db.cursor()
-        curr.execute(query, record_to_add)
-        self.db.commit()
+        query = """SELECT incidents_id, createdOn, createdBy,
+                    type_of_incident, status, comment, location,
+                    images, videos FROM incidents WHERE createdBy = '{0}'""".format(id)
+        curr.execute(query)
+        data = curr.fetchall()
+        response = []
+        
+        for i, items in enumerate(data):
+            incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = items
+            record = dict(
+                id=incidents_id,
+                createdOn=str(createdOn),
+                createdBy=createdBy,
+                type_of_incident=type_of_incident,
+                status=status,
+                comment=comment,
+                location=location,
+                images=images,
+                videos=videos
+            )
+            result = marshal(record, record_fields)
+            response.append(result)
+
+        return response
 
     def fetchone(self, id):
         # fetch data
         curr = self.db.cursor()
-        query = """SELECT incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos FROM incidents WHERE incidents_id = {0}""".format(id)
+        query = """SELECT incidents_id, createdOn, createdBy,
+                    type_of_incident, status, comment, location,
+                    images, videos FROM incidents WHERE incidents_id = {0}""".format(id)
         curr.execute(query)
         data = curr.fetchone()
     
         incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = data
         record = dict(
-            id=int(incidents_id),
+            id=incidents_id,
             createdOn=str(createdOn),
             createdBy=createdBy,
             type_of_incident=type_of_incident,
@@ -80,6 +100,22 @@ class ManipulateDbase():
         )
         result = marshal(record, record_fields)
         return result
+
+    def save(self, record_to_add):
+        # save data
+        query = """INSERT INTO incidents
+                    (createdBy, type_of_incident,
+                    status, comment, location, images, videos) 
+                    VALUES (%(createdBy)s, %(type_of_incident)s,
+                    %(status)s, %(comment)s, %(location)s, %(images)s,
+                    %(videos)s) RETURNING incidents_id;"""
+
+        curr = self.db.cursor()
+        curr.execute(query, record_to_add)
+        value = curr.fetchone()
+        self.db.commit()
+       
+        return self.fetchone(value[0])
 
     def edit(self, id, data_to_edit):
         for key in data_to_edit.keys():
@@ -108,6 +144,6 @@ record_fields = {
     "images": fields.String,
     "videos": fields.String,
     "comment": fields.String,
-    "uri": fields.Url('api-v2.incident')
+    "uri": fields.Url('api-v2.new_incident')
 }
 

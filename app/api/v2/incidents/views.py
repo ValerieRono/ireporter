@@ -11,13 +11,13 @@ from app.api.v2.utils import token_required
 manipulate = ManipulateDbase()
 
 record_parser = reqparse.RequestParser()
-record_parser.add_argument(
-    'createdBy',
-    required=True,
-    help='please provide input',
-    type=int,
-    location='json'
-    )
+# record_parser.add_argument(
+#     'createdBy',
+#     required=True,
+#     help='please provide input',
+#     type=int,
+#     location='json'
+#     )
 record_parser.add_argument(
     'type_of_incident',
     required=True,
@@ -55,11 +55,11 @@ record_parser.add_argument(
     )
 
 edit_parser = reqparse.RequestParser()
-edit_parser.add_argument(
-    'createdBy',
-    type=int,
-    location='json'
-    )
+# edit_parser.add_argument(
+#     'createdBy',
+#     type=int,
+#     location='json'
+#     )
 edit_parser.add_argument(
     'type_of_incident',
     type=str,
@@ -91,6 +91,8 @@ status_parser.add_argument(
     type=inputs.regex(r'^\b(Under Investigation|Rejected|Resolved)\b$'),
     location='json'
 )
+
+
 # for serialization
 class IncidentSchema(Schema):
     id = fields.Int()
@@ -109,13 +111,20 @@ incidents_Schema = IncidentSchema(many=True)
 
 
 class MyIncidents(Resource):
-    # @token_required
-    def get(self):
-        response = manipulate.fetch()
+    @token_required
+    def get(self, user):
+        if user['is_admin'] is True:
+            response = manipulate.fetch()
+            return {
+                "status": 200,
+                "data": [{"incidents": response, "message": "successfull"}]
+            }, 200
+        response = manipulate.fetch_all_own(user['user_id'])
         return {
             "status": 200,
             "data": [{"incidents": response, "message": "successfull"}]
         }, 200
+
 
     @token_required
     def post(self, user):
@@ -137,8 +146,8 @@ class MyIncidents(Resource):
             comment=data['comment']
         )
         new_incident = incident_Schema.dump(incident).data
-        manipulate.save(new_incident)
-        result = marshal(new_incident, record_fields)
+        save_incident = manipulate.save(new_incident)
+        result = marshal(save_incident, record_fields)
         return {
             'status': 201,
             'data': [{"record": result, "message": "created incident record"}]
@@ -152,50 +161,61 @@ class MyIncident(Resource):
 
     @token_required
     def get(self, user, id):
-        result = manipulate.fetchone(id)
+        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        if user['user_id'] == record['createdBy'] or user['isAdmin'] is True:
+            result = manipulate.fetchone(id)
+            return {
+                "status": 200,
+                "data": [{"incidents": result, "message": "successfull"}]
+            }, 200
         return {
-            "status": 200,
-            "data": [{"incidents": result, "message": "successfull"}]
-        }, 200
+            "status": 403,
+            "message": "Forbidden, can only view record you created"
+        }, 403
 
     @token_required
     def put(self, user, id):
-        record = manipulate.fetchone(id)
-        if record['status'] != 'draft':
-            return {
-                "status": 403,
-                "message": "forbidden, cannot edit record unless under draft"
-            }, 403
-        data = edit_parser.parse_args()
-        if not data:
-            abort(400)
-        manipulate.edit(id, data)      
-        return {
-            "status": 200,
-            "data": [{"message": "successfully edited record"}]
-        }, 200
-
-    @token_required
-    def delete(self, user, id):
-        manipulate.delete(id)
-        return {
-            "status": 200,
-            "data": [{"message": "successfully deleted record"}]
-        }, 200
-
-    @token_required
-    def patch(self, user, id):
-        data = status_parser.parse_args()
-        if not data:
-            abort(400)
-       
-        if user['is_admin'] == True:
+        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        if user['user_id'] == record['createdBy'] and record['status'] == 'draft': 
+            data = edit_parser.parse_args()
+            if not data:
+                abort(400)
             manipulate.edit(id, data)      
             return {
                 "status": 200,
                 "data": [{"message": "successfully edited record"}]
             }, 200
         return {
-            "status" : 403,
-            "message" : "Forbidden, cannot edit status"
-        }
+                "status": 403,
+                "message": "forbidden, cannot edit record"
+        }, 403
+
+    @token_required
+    def delete(self, user, id):
+        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
+            return {
+                "status": 200,
+                "data": [{"message": "successfully deleted record"}]
+            }, 200
+        return {
+            "status": 403,
+            "message": "forbidden, can only delete own record"
+        }, 403
+
+    @token_required
+    def patch(self, user, id):
+        data = status_parser.parse_args()
+        if not data:
+            abort(400)
+
+        if user['is_admin'] is True:
+            manipulate.edit(id, data)      
+            return {
+                "status": 200,
+                "data": [{"message": "successfully edited record"}]
+            }, 200
+        return {
+            "status": 403,
+            "message": "Forbidden, cannot edit status"
+        }, 403
