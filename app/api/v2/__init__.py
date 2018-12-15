@@ -11,7 +11,7 @@ api = Api(v2)
 
 # setup API resource routing
 api.add_resource(MyIncidents, '/incidents', endpoint='incidents')
-api.add_resource(MyIncident, '/incidents/<int:id>', endpoint='incident')
+api.add_resource(MyIncident, '/incidents/<int:id>', endpoint='new_incident')
 
 api.add_resource(MyUsers, '/users', endpoint='users')
 api.add_resource(MyUser, '/users/<int:id>', endpoint='user')

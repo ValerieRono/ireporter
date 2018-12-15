@@ -6,6 +6,8 @@ from marshmallow import Schema, fields
 
 # local import
 from app.api.v2.Users.models import record_fields, Users, ManipulateDbase
+from app.api.v2.utils import generate_token, decode_token
+from app.api.v2.utils import token_required
 
 record_parser = reqparse.RequestParser()
 
@@ -108,6 +110,7 @@ login_parser.add_argument(
     location='json'
 )
 
+
 # for serialization
 class IncidentSchema(Schema):
     id = fields.Int()
@@ -125,26 +128,27 @@ class IncidentSchema(Schema):
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
 
-manipulate = ManipulateDbase()
-
 
 class MyUsers(Resource):
     def __init__(self):
         super(MyUsers, self).__init__()
         self.parser = record_parser
-
-    def get(self):
-        response = manipulate.fetch()
+    
+    @token_required
+    def get(self, user):
+        if user['is_admin'] is True:
+            response = ManipulateDbase().fetch()
+            return {
+                "status": 200,
+                "data": [{"incidents": response, "message": "successfull"}]
+            }, 200
         return {
-            "status": 200,
-            "data": [{"incidents": response, "message": "successfull"}]
-        }, 200
+            "status": 403,
+            "message": "Forbidden, only admin can view all users"
+        }, 403
 
     def post(self):
         args = self.parser.parse_args()
-        # query to see if user exists
-        # user = manipulate.find_by_email(args['email'])
-        # if not user:
         keys = args.keys()
         for key in keys:
             if not args[key]:
@@ -162,20 +166,12 @@ class MyUsers(Resource):
                 password=args['password']
             )
         new_user = incident_Schema.dump(user).data
-
-        # # hash password and store the hashed password with the user
-        # user.hash_password()
-
-        save_user = manipulate.save(new_user)
+        save_user = ManipulateDbase().save(new_user)
         result = marshal(save_user, record_fields)
         return {
             'status': 201,
             'data': [{"user": result, "message": "registered user"}]
         }, 201
-
-        # return {
-        #     'message': 'user with email exists, proceed to log in'
-        # }, 401
 
 
 class login(Resource):
@@ -187,14 +183,14 @@ class login(Resource):
 
         data = login_parser.parse_args()
         username = data['username']
-        user = manipulate.find_by_username(username)
-
+        user = ManipulateDbase().find_by_username(username)
+        # import pdb; pdb.set_trace()
         # verify password
         if not user or not user[1].verify_password(data['password']):
             return {
                 'message': 'Invalid email or password, Please try again'
             }, 401
-        access_token = user[1].generate_token(user[0]['id'], user[0]['isAdmin'])
+        access_token = generate_token(self, user[0]['id'], user[0]['isAdmin'])
         return {
             'message': 'You logged in successfully.',
             'access_token': access_token.decode()
@@ -205,21 +201,31 @@ class MyUser(Resource):
     def __init__(self):
         super(MyUser, self).__init__()
     
-    # @token_required
-    def get(self, id):
-        result = manipulate.fetch_by_id(id)
+    @token_required
+    def get(self, user, id):
+        if user['user_id'] == id or user['isAdmin'] is True:
+            result = ManipulateDbase().fetch_by_id(id)
+            return {
+                "status": 200,
+                "data": [{"incidents": result, "message": "successfull"}]
+            }, 200
         return {
-            "status": 200,
-            "data": [{"incidents": result, "message": "successfully fetched user record"}]
-        }, 200
+            "status": 403,
+            "message": "Forbidden, can only view own record"
+        }, 403
 
     # @token_required
-    def put(self, id):
-        data = edit_parser.parse_args()
-        if not data:
-            abort(400)
-        manipulate.edit(id, data)      
+    def put(self, user, id):
+        if user['user_id'] == id:
+            data = edit_parser.parse_args()
+            if not data:
+                abort(400)
+            ManipulateDbase().edit(id, data)      
+            return {
+                "status": 200,
+                "data": [{"message": "successfully edited user record"}]
+            }, 200
         return {
-            "status": 200,
-            "data": [{"message": "successfully edited user record"}]
-        }, 200
+            "status": 403,
+            "message": "Forbidden, can only edit own record"
+        }, 403

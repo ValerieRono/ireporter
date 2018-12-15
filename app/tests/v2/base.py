@@ -2,7 +2,7 @@
 import unittest
 
 from ... import create_app
-from ...database_config import destroy_tables, init_db
+from ...database_config import destroy_tables
 
 
 class BaseTestCase(unittest.TestCase):
@@ -12,7 +12,8 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         """ set up app configuration """
         self.app = create_app(config_name="testing")
-        self.db = init_db()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         self.client = self.app.test_client()
         self.sign_up_user = {
             "firstname": "Valerie",
@@ -161,7 +162,9 @@ class BaseTestCase(unittest.TestCase):
         }
 
     def tearDown(self):
-        pass
+        db_url = self.app.config.get('DATABASE_URL')
+        # import pdb; pdb.set_trace()
+        destroy_tables(url=db_url)
 
 
 if __name__ == '__main__':

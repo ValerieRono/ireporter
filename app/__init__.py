@@ -11,8 +11,9 @@ from .database_config import create_tables
 def create_app(config_name):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(app_config[config_name])
-    create_tables()
+    db_url = app.config.get('DATABASE_URL')
+    create_tables(url=db_url)
     app.register_blueprint(v1)
     app.register_blueprint(v2)
-    
-    return app 
+
+    return app
