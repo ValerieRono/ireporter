@@ -15,15 +15,15 @@ record_parser.add_argument(
     'type_of_incident',
     required=True,
     help='type can only be Redflag or Intervention',
-    type=inputs.regex(r'^\b(Redflag|intervention)\b$'), 
+    choices=('Redflag', 'Intervention'),
     location='json'
 )
 
 record_parser.add_argument(
     'location',
     required=True,
-    help='please provide input',
-    type=str,
+    help='wrong location format',
+    type=inputs.regex('^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$'),
     location='json'
     )
 
@@ -31,59 +31,57 @@ record_parser.add_argument(
     'images',
     required=True,
     help='Please provide input.',
-    type=str,
+    type=list,
     location='json'
     )
 record_parser.add_argument(
     'videos',
     required=True,
     help='please provide input',
-    type=str,
+    type=list,
     location='json'
     )
 record_parser.add_argument(
     'comment',
     required=True,
     help='please comment',
-    type=inputs.regex(r'^(?!\s*$).+'),
+    type=inputs.regex('^[a-zA-Z\s*]{5,140}$'),
     location='json'
     )
 
 edit_parser = reqparse.RequestParser()
-# edit_parser.add_argument(
-#     'createdBy',
-#     type=int,
-#     location='json'
-#     )
+
 edit_parser.add_argument(
     'type_of_incident',
-    type=str,
+    choices=('Redflag', 'Intervention'),
+    help='type can only be Redflag or Intervention',
     location='json'
-    )
+)
 edit_parser.add_argument(
     'location',
-    type=str,
+    type=inputs.regex('^(\-?\d+(\.\d+)?),\s*(\-?\d+(\.\d+)?)$'),
     location='json'
     )
 edit_parser.add_argument(
     'images',
-    type=str,
+    type=list,
     location='json'
     )
 edit_parser.add_argument(
     'videos',
-    type=str,
+    type=list,
     location='json'
     )
 edit_parser.add_argument(
     'comment',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{5,140}$'),
     location='json'
     )
 status_parser = reqparse.RequestParser()
 status_parser.add_argument(
     'status',
-    type=inputs.regex(r'^\b(Under Investigation|Rejected|Resolved)\b$'),
+    choices=('Under Investigation', 'Resolved', 'Rejected'),
+    help='status can only be Under investigation, Resolved or Rejection',
     location='json'
 )
 
@@ -114,7 +112,7 @@ class MyIncidents(Resource):
                 "status": 200,
                 "data": [{"incidents": response, "message": "successfull"}]
             }, 200
-        response = ManipulateDbase().fetch_all_own(user['user_id'])
+        response = ManipulateDbase().fetch_all_own(id=user['user_id'])
         return {
             "status": 200,
             "data": [{"incidents": response, "message": "successfull"}]
@@ -123,7 +121,10 @@ class MyIncidents(Resource):
 
     @token_required
     def post(self, user):
+        from flask import request
+        # import pdb; pdb.set_trace()
         data = record_parser.parse_args()
+        # import pdb; pdb.set_trace()
         keys = data.keys()
         for key in keys:
             if not data[key]:
@@ -157,46 +158,70 @@ class MyIncident(Resource):
     @token_required
     def get(self, user, id):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
-        if user['user_id'] == record['createdBy'] or user['isAdmin'] is True:
-            result = ManipulateDbase().fetchone(id)
+        if record:
+            if user['user_id'] == record['createdBy'] or user['isAdmin'] is True:
+                result = ManipulateDbase().fetchone(id)
+                return {
+                    "status": 200,
+                    "data": [{"incidents": result, "message": "successfull"}]
+                }, 200
             return {
-                "status": 200,
-                "data": [{"incidents": result, "message": "successfull"}]
-            }, 200
+                "status": 403,
+                "message": "Forbidden, can only view record you created"
+            }, 403
         return {
-            "status": 403,
-            "message": "Forbidden, can only view record you created"
-        }, 403
+            "message": "incident not found"
+        }, 404
 
     @token_required
     def put(self, user, id):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
-        if user['user_id'] == record['createdBy'] and record['status'] == 'draft': 
-            data = edit_parser.parse_args()
-            if not data:
-                abort(400)
-            ManipulateDbase().edit(id, data)      
+        # import pdb; pdb.set_trace()
+        if record:
+            if user['user_id'] == record['createdBy'] and record['status'] == 'draft': 
+                data = edit_parser.parse_args()
+                # pdb.set_trace()
+
+                if not data:
+                    return {
+                        "message": "Invalid data provided"
+                    }, 400
+                ManipulateDbase().edit(id, data)      
+                return {
+                    "status": 200,
+                    "data": [{
+                        "message": "successfully edited record",
+                        "record": record}]
+                }, 200
             return {
-                "status": 200,
-                "data": [{"message": "successfully edited record"}]
-            }, 200
+                    "status": 403,
+                    "message": "forbidden, cannot edit record"
+            }, 403
+
         return {
-                "status": 403,
-                "message": "forbidden, cannot edit record"
-        }, 403
+            "status": 404,
+            "message": "Record not found"
+        }, 404
 
     @token_required
     def delete(self, user, id):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
-        if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
+        if record:
+            if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
+                ManipulateDbase().delete(id)      
+                return {
+                    "status": 200,
+                    "data": [{"message": "successfully deleted record"}]
+                }, 200
             return {
-                "status": 200,
-                "data": [{"message": "successfully deleted record"}]
-            }, 200
+                "status": 403,
+                "message": "forbidden, can only delete own record"
+            }, 403
+
         return {
-            "status": 403,
-            "message": "forbidden, can only delete own record"
-        }, 403
+            "status": 404,
+            "message": "Record not found"
+        }, 404
 
     @token_required
     def patch(self, user, id):

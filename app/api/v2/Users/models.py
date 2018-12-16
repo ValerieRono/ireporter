@@ -47,6 +47,8 @@ class ManipulateDbase():
         curr.execute(query)
         data = curr.fetchall()
         response = []
+        if not data:
+            return response
 
         for i, items in enumerate(data):
             user_id, firstname, lastname, othernames, username, email, phoneNumber, password, registered, isAdmin = items
@@ -73,10 +75,12 @@ class ManipulateDbase():
         query = """SELECT user_id, firstname, lastname,
                     othernames, username, email, phoneNumber,
                     password, registered, isAdmin
-                    FROM users_table WHERE user_id = {0}""".format(id)
+                    FROM users_table WHERE user_id = '{0}'""".format(id)
         curr.execute(query)
         data = curr.fetchone()
-
+        if data is None:
+            response = []
+            return response
         user_id, firstname, lastname, othernames, username, email, phoneNumber, password, registered, isAdmin = data
         record = dict(
             id=user_id,
@@ -100,6 +104,9 @@ class ManipulateDbase():
         curr = self.db.cursor()
         curr.execute(query)
         data = curr.fetchone()
+        if data is None:
+            response = []
+            return response
         user_id, firstname, lastname, othernames, username, email, phoneNumber, password, registered, isAdmin = data
         user = dict(
             id=user_id,
@@ -122,7 +129,8 @@ class ManipulateDbase():
             phoneNumber=user['phoneNumber'],
             password=user['password']
             )
-        return [user, email_user]
+        response = [user, email_user]
+        return response
 
     def save(self, record_to_add):
         # save data

@@ -22,6 +22,7 @@ def destroy_tables(url):
     curr.execute("""DROP TABLE IF EXISTS incidents CASCADE;""")
     curr.execute("""DROP TABLE IF EXISTS users_table CASCADE;""")
     conn.commit()
+    # conn.close()
 
 
 def tables():
