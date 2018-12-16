@@ -1,7 +1,8 @@
 from flask_restful import fields, marshal
+from flask import current_app
 import datetime
 
-from app.database_config import init_db
+from app.database_config import connection
 
 
 class Incidents():
@@ -19,7 +20,8 @@ class Incidents():
 
 class ManipulateDbase():
     def __init__(self):
-        self.db = init_db()
+        db_url = current_app.config.get('DATABASE_URL')
+        self.db = connection(url=db_url)
 
     def fetch(self):
         # fetch data

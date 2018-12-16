@@ -1,11 +1,13 @@
 # from flask import current_app
+from datetime import datetime
 from flask_restful import fields, marshal
-from datetime import datetime, timedelta
-from passlib.apps import custom_app_context as pwd_context
-import jwt
+from flask import current_app
+from werkzeug.security import generate_password_hash, check_password_hash
+
 
 # local import
-from app.database_config import init_db
+from app.database_config import connection
+
 
 class Users():
 
@@ -20,7 +22,7 @@ class Users():
         self.phoneNumber = phoneNumber
         self.username = username
         self.password = password
-        self.password_hash = pwd_context.encrypt(password)
+        self.password_hash = generate_password_hash(password)
         self.registered = datetime.now
         self.isAdmin = False
 
@@ -28,55 +30,13 @@ class Users():
 
         """ verify password when user provides details during log in """
 
-        return pwd_context.verify(password, self.password_hash)
+        return check_password_hash(self.password_hash, password)
 
-    def generate_token(self, user_id, is_admin):
-
-        """ Generates the access token"""
-        SECRET_KEY = "g;ifdykrdsthawrxyg;fidkysktyrdyckrytkdG"
-
-        try:
-            # set up a payload with an expiration time
-            payload = {
-                'exp': datetime.utcnow() + timedelta(minutes=120),
-                'iat': datetime.utcnow(),
-                'user': {
-                    'user_id': user_id,
-                    'is_admin': is_admin
-                }
-            }
-            # create the byte string token using the payload and the SECRET key
-            jwt_string = jwt.encode(
-                payload,
-                SECRET_KEY,
-                algorithm='HS256'
-            )
-            return jwt_string
-
-        except Exception as e:
-            # return an error in string format if an exception occurs
-            return str(e)
-
-    @staticmethod
-    def decode_token(token):
-
-        """Decodes the access token from the Authorization header."""
-        SECRET_KEY = "g;ifdykrdsthawrxyg;fidkysktyrdyckrytkdG"
-
-        try:
-            # try to decode the token using our SECRET variable
-            payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-            return payload['user']
-        except jwt.ExpiredSignatureError:
-            # the token is expired, return an error string
-            return "Expired token. Please login to get a new token"
-        except jwt.InvalidTokenError:
-            # the token is invalid, return an error string
-            return "Invalid token."
-
+   
 class ManipulateDbase():
     def __init__(self):
-        self.db = init_db()
+        db_url = current_app.config.get('DATABASE_URL')
+        self.db = connection(url=db_url)
 
     def fetch(self):
         # fetch data
@@ -176,7 +136,7 @@ class ManipulateDbase():
         curr.execute(query, record_to_add)
         value = curr.fetchone()
         self.db.commit()
-
+       
         return self.fetch_by_id(value[0])
 
     def edit(self, id, data_to_edit):

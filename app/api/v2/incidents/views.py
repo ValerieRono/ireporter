@@ -8,23 +8,17 @@ from app.api.v2.incidents.models import record_fields
 
 from app.api.v2.utils import token_required
 
-manipulate = ManipulateDbase()
 
 record_parser = reqparse.RequestParser()
-# record_parser.add_argument(
-#     'createdBy',
-#     required=True,
-#     help='please provide input',
-#     type=int,
-#     location='json'
-#     )
+
 record_parser.add_argument(
     'type_of_incident',
     required=True,
     help='type can only be Redflag or Intervention',
     type=inputs.regex(r'^\b(Redflag|intervention)\b$'), 
     location='json'
-    )
+)
+
 record_parser.add_argument(
     'location',
     required=True,
@@ -32,10 +26,11 @@ record_parser.add_argument(
     type=str,
     location='json'
     )
+
 record_parser.add_argument(
     'images',
     required=True,
-    help='please provide input',
+    help='Please provide input.',
     type=str,
     location='json'
     )
@@ -114,12 +109,12 @@ class MyIncidents(Resource):
     @token_required
     def get(self, user):
         if user['is_admin'] is True:
-            response = manipulate.fetch()
+            response = ManipulateDbase().fetch()
             return {
                 "status": 200,
                 "data": [{"incidents": response, "message": "successfull"}]
             }, 200
-        response = manipulate.fetch_all_own(user['user_id'])
+        response = ManipulateDbase().fetch_all_own(user['user_id'])
         return {
             "status": 200,
             "data": [{"incidents": response, "message": "successfull"}]
@@ -146,7 +141,7 @@ class MyIncidents(Resource):
             comment=data['comment']
         )
         new_incident = incident_Schema.dump(incident).data
-        save_incident = manipulate.save(new_incident)
+        save_incident = ManipulateDbase().save(new_incident)
         result = marshal(save_incident, record_fields)
         return {
             'status': 201,
@@ -161,9 +156,9 @@ class MyIncident(Resource):
 
     @token_required
     def get(self, user, id):
-        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if user['user_id'] == record['createdBy'] or user['isAdmin'] is True:
-            result = manipulate.fetchone(id)
+            result = ManipulateDbase().fetchone(id)
             return {
                 "status": 200,
                 "data": [{"incidents": result, "message": "successfull"}]
@@ -175,12 +170,12 @@ class MyIncident(Resource):
 
     @token_required
     def put(self, user, id):
-        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if user['user_id'] == record['createdBy'] and record['status'] == 'draft': 
             data = edit_parser.parse_args()
             if not data:
                 abort(400)
-            manipulate.edit(id, data)      
+            ManipulateDbase().edit(id, data)      
             return {
                 "status": 200,
                 "data": [{"message": "successfully edited record"}]
@@ -192,7 +187,7 @@ class MyIncident(Resource):
 
     @token_required
     def delete(self, user, id):
-        record = incident_Schema.dump(manipulate.fetchone(id)).data
+        record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
             return {
                 "status": 200,
@@ -210,7 +205,7 @@ class MyIncident(Resource):
             abort(400)
 
         if user['is_admin'] is True:
-            manipulate.edit(id, data)      
+            ManipulateDbase().edit(id, data)      
             return {
                 "status": 200,
                 "data": [{"message": "successfully edited record"}]

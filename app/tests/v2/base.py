@@ -2,7 +2,7 @@
 import unittest
 
 from ... import create_app
-from ...database_config import destroy_tables, init_db
+from ...database_config import destroy_tables
 
 
 class BaseTestCase(unittest.TestCase):
@@ -12,7 +12,8 @@ class BaseTestCase(unittest.TestCase):
     def setUp(self):
         """ set up app configuration """
         self.app = create_app(config_name="testing")
-        self.db = init_db()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
         self.client = self.app.test_client()
         self.sign_up_user = {
             "firstname": "Valerie",
@@ -22,15 +23,6 @@ class BaseTestCase(unittest.TestCase):
             "phoneNumber": "number",
             "username": "hella",
             "password": "badgirl"
-        }
-        self.sign_up_existing_user = {
-            "firstname": "Valerie",
-            "lastname": "Rono",
-            "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
-            "username": "loki",
-            "password": "abc123"
         }
         self.sign_up_user_no_data = {}
         self.sign_up_user_missing_field = {
@@ -90,9 +82,24 @@ class BaseTestCase(unittest.TestCase):
             "username": "hella",
             "password": "badgirl"
         }
-        self.log_in_wrong_details = {
-            "username": "hell",
+        self.log_in_user_missing_field = {
             "password": "badgirl"
+        }
+        self.log_in_user_empty_String = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_user_whitespace = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_user_special_characters = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_wrong_details = {
+            "username": "hella",
+            "password": "badgir"
         }
         self.post_incident = {
             "type_of_incident": "Redflag",
@@ -101,22 +108,16 @@ class BaseTestCase(unittest.TestCase):
             "videos": "blah",
             "comment": "wow"
         }
-        self.post_existing_incident = {
-            "type_of_incident": "Redflag",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
-        }
+
         self.post_incident_no_data = {
 
         }
         self.post_incident_empty_string = {
             "type_of_incident": "Redflag",
-            "location": "",
+            "location": "blah",
             "images": "blah",
             "videos": "blah",
-            "comment": "wow"
+            "comment": ""
         }
         self.post_incident_whitespace = {
             "type_of_incident": "Redflag",
@@ -138,13 +139,7 @@ class BaseTestCase(unittest.TestCase):
             "videos": "blah",
             "comment": "&%$^%"
         }
-        self.post_incident_not_allows = {
-            "type_of_incident": "incident",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
-        }
+        self.post_incident_not_json = ()
         self.post_incident_not_String = {
             "type_of_incident": "Redflag",
             "location": "location",
@@ -159,9 +154,24 @@ class BaseTestCase(unittest.TestCase):
             "videos": "blah",
             "comment": "21332"
         }
+        self.edit_incident = {
+            "othernames": "others"
+        }
+        self.edit_incident_status = {
+            "status": "Resolved"
+        }
+        self.edit_incident_invalid = {
+            "othernames": ""
+        }
+        self.edit_incident_no_input = ()
+        self.edit_incident_location = {
+            "location": "location"
+        }
 
     def tearDown(self):
-        pass
+        db_url = self.app.config.get('DATABASE_URL')
+        # import pdb; pdb.set_trace()
+        destroy_tables(url=db_url)
 
 
 if __name__ == '__main__':

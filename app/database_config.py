@@ -1,31 +1,28 @@
 import psycopg2
-from instance.config import app_config
-import os
-# from flask import current_app
-env = os.getenv('FLASK_CONFIG')
-url = app_config[env].DATABASE_URL
 
-#url = "dbname='ireporter' host='localhost' port='5432' user='postgres' password='123abc'"
 
 def connection(url):
     conn = psycopg2.connect(url)
     return conn
 
-def init_db():
-    conn = connection(url)
-    return conn
 
-def create_tables():
+def create_tables(url):
     conn = connection(url)
     curr = conn.cursor()
     queries = tables()
     for query in queries:
         curr.execute(query)
     conn.commit()
-    
 
-def destroy_tables():
-    pass
+
+def destroy_tables(url):
+    conn = connection(url)
+    curr = conn.cursor()
+    # import pdb; pdb.set_trace()
+    curr.execute("""DROP TABLE IF EXISTS incidents CASCADE;""")
+    curr.execute("""DROP TABLE IF EXISTS users_table CASCADE;""")
+    conn.commit()
+
 
 def tables():
     users_table = """CREATE TABLE IF NOT EXISTS users_table (
@@ -42,7 +39,7 @@ def tables():
     )"""
 
     incidents = """CREATE TABLE IF NOT EXISTS incidents (
-        incidents_id numeric PRIMARY KEY NOT NULL,
+        incidents_id serial PRIMARY KEY NOT NULL,
         createdOn timestamp with time zone DEFAULT ('now'::text)::date NOT NULL,
         createdBy int NOT NULL REFERENCES users_table(user_id),
         type_of_incident character varying(20) NOT NULL,
