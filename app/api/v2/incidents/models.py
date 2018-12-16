@@ -31,6 +31,9 @@ class ManipulateDbase():
                     images, videos FROM incidents"""
         curr.execute(query)
         data = curr.fetchall()
+        if data is None:
+            response = []
+            return response
         response = []
         
         for i, items in enumerate(data):
@@ -59,6 +62,9 @@ class ManipulateDbase():
                     images, videos FROM incidents WHERE createdBy = '{0}'""".format(id)
         curr.execute(query)
         data = curr.fetchall()
+        if data is None:
+            response = []
+            return response
         response = []
         
         for i, items in enumerate(data):
@@ -87,7 +93,9 @@ class ManipulateDbase():
                     images, videos FROM incidents WHERE incidents_id = {0}""".format(id)
         curr.execute(query)
         data = curr.fetchone()
-    
+        if data is None:
+            response = []
+            return response
         incidents_id, createdOn, createdBy, type_of_incident, status, comment, location, images, videos = data
         record = dict(
             id=incidents_id,

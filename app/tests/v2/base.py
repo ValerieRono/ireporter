@@ -1,5 +1,6 @@
 """ base class for all the tests"""
 import unittest
+from flask import json
 
 from ... import create_app
 from ...database_config import destroy_tables
@@ -8,7 +9,7 @@ from ...database_config import destroy_tables
 class BaseTestCase(unittest.TestCase):
 
     """ set up configurations for the test environment """
-
+    
     def setUp(self):
         """ set up app configuration """
         self.app = create_app(config_name="testing")
@@ -19,8 +20,8 @@ class BaseTestCase(unittest.TestCase):
             "firstname": "Valerie",
             "lastname": "Rono",
             "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
+            "email": "ronovalerie@gmail.com",
+            "phoneNumber": '0717245777',
             "username": "hella",
             "password": "badgirl"
         }
@@ -28,8 +29,8 @@ class BaseTestCase(unittest.TestCase):
         self.sign_up_user_missing_field = {
             "firstname": "Valerie",
             "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
+            "email": "ronovaleri@gmail.com",
+            "phoneNumber": "0717245777",
             "username": "loki",
             "password": "abc123"
         }
@@ -37,8 +38,8 @@ class BaseTestCase(unittest.TestCase):
             "firstname": "",
             "lastname": "Rono",
             "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
+            "email": "ronovaler@gmail.com",
+            "phoneNumber": "0717245777",
             "username": "loki",
             "password": "abc123"
         }
@@ -46,34 +47,34 @@ class BaseTestCase(unittest.TestCase):
             "firstname": "Valerie",
             "lastname": "Rono",
             "othernames": "other",
-            "email": "blah",
-            "phoneNumber": "number",
+            "email": "ronovalegmail.com",
+            "phoneNumber": "0717245777",
             "username": "loki",
             "password": "abc123"
         }
         self.sign_up_user_whitespace = {
-            "firstname": "    ",
+            "firstname": "uugg",
             "lastname": "Rono",
             "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
-            "username": "loki",
+            "email": "ronoval@gmail.com",
+            "phoneNumber": "0717245777",
+            "username": " ",
             "password": "abc123"
         }
         self.sign_up_user_special_characters = {
             "firstname": "Valerie",
             "lastname": "Rono",
             "othernames": "&%&%$",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
-            "username": "loki",
+            "email": "ronova@gmail.com",
+            "phoneNumber": "0717245777",
+            "username": "&&%%",
             "password": "abc123"
         }
         self.sign_up_user_invalid_phone_number = {
             "firstname": "Valerie",
             "lastname": "Rono",
             "othernames": "other",
-            "email": "ronovalerie@gmail",
+            "email": "ronov@gmail.com",
             "phoneNumber": "number",
             "username": "loki",
             "password": "abc123"
@@ -86,7 +87,7 @@ class BaseTestCase(unittest.TestCase):
             "password": "badgirl"
         }
         self.log_in_user_empty_String = {
-            "username": "hella",
+            "username": "",
             "password": "badgirl"
         }
         self.log_in_user_whitespace = {
@@ -103,10 +104,10 @@ class BaseTestCase(unittest.TestCase):
         }
         self.post_incident = {
             "type_of_incident": "Redflag",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
+            "location": "1,7",
+            "images": ["blah"],
+            "videos": ["blah"],
+            "comment": "wow i love this"
         }
 
         self.post_incident_no_data = {
@@ -114,65 +115,143 @@ class BaseTestCase(unittest.TestCase):
         }
         self.post_incident_empty_string = {
             "type_of_incident": "Redflag",
-            "location": "blah",
-            "images": "blah",
-            "videos": "blah",
+            "location": "1,0.9",
+            "images": ["blah"],
+            "videos": ["blah"],
             "comment": ""
         }
         self.post_incident_whitespace = {
             "type_of_incident": "Redflag",
-            "location": "rongai",
-            "images": "     ",
-            "videos": "blah",
-            "comment": "wow"
+            "location": "4,8",
+            "images": ["blah"],
+            "videos": ["blah"],
+            "comment": "    "
         }
         self.post_incident_no_field = {
             "type_of_incident": "Redflag",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
+            "images": ["blah"],
+            "videos": ["blah"],
+            "comment": "wow ikk juttd"
         }
         self.post_incident_special_characters = {
             "type_of_incident": "Redflag",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
+            "location": "5,9",
+            "images": ["blah"],
+            "videos": ["blah"],
             "comment": "&%$^%"
         }
         self.post_incident_not_json = ()
         self.post_incident_not_String = {
             "type_of_incident": "Redflag",
-            "location": "location",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
+            "location": "9,8.0",
+            "images": ["blah"],
+            "videos": ["blah"],
+            "comment": "wow ugy drrdf"
         }
         self.post_incident_bad_location_format = {
             "type_of_incident": "Redflag",
             "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "21332"
+            "images": ["blah"],
+            "videos": ["blah"],
+            "comment": "i am a comment"
         }
         self.edit_incident = {
             "othernames": "others"
         }
         self.edit_incident_status = {
-            "status": "Resolved"
+            "status": "pending"
         }
         self.edit_incident_invalid = {
-            "othernames": ""
+            "type_of_incident": "",
+            "location": "",
+            "images": "",
+            "videos": "",
+            "comment": ""
         }
-        self.edit_incident_no_input = ()
+        
         self.edit_incident_location = {
-            "location": "location"
+            "location": "rongai"
         }
+    
+    def register_user(self):
+
+        response = self.client.post('api/v2/users',
+                                    data=json.dumps(self.sign_up_user),
+                                    headers={'content-type': 'application/json'}
+                                    )
+        return response
+
+    def login_user(self):
+
+        response = self.client.post(
+            'api/v2/users/login', data=json.dumps(self.log_in_user),
+            headers={'content-type': 'application/json'}
+            )
+        return response
+
+    def get_access_token(self):
+        self.register_user()
+        response = self.login_user()
+        self.data = json.loads(response.data)  
+        self.token = self.data['access_token']
+        print(self.token)
+
+    def create_incident(self, data):
+        
+        """ post an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        # import pdb; pdb.set_trace()
+        incident = self.client.post(
+                                'api/v2/incidents',
+                                data=json.dumps(data),
+                                headers={
+                                    'content-type': 'application/json',
+                                    'Authorization': f"Bearer {access_token}"
+                                    }
+                                )
+        return incident
+
+    def edit_any_incident_field(self, data):
+
+        """ edit an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        incident = self.client.put(
+                                'api/v2/incidents/1',
+                                data=json.dumps(data),
+                                headers={
+                                    'content-type': 'application/json',
+                                    'Authorization': f"Bearer {access_token}"
+                                    }
+                                )
+        return incident
+
+    def edit_incident_not_found(self, data):
+
+        """ edit an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        incident = self.client.put(
+                                'api/v2/incidents/50',
+                                data=json.dumps(data),
+                                headers={
+                                    'content-type': 'application/json',
+                                    'Authorization': f"Bearer {access_token}"
+                                    }
+                                )
+        return incident
+
 
     def tearDown(self):
         db_url = self.app.config.get('DATABASE_URL')
         # import pdb; pdb.set_trace()
+        
         destroy_tables(url=db_url)
 
-
+    
 if __name__ == '__main__':
     unittest.main()

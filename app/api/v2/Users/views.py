@@ -2,6 +2,7 @@ from flask import abort
 from flask import request
 from flask_restful import Resource, reqparse, marshal, inputs
 from marshmallow import Schema, fields
+import re
 
 
 # local import
@@ -15,85 +16,84 @@ record_parser.add_argument(
     'firstname',
     required=True,
     help='please provide input',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json'
     )
 record_parser.add_argument(
     'lastname',
     required=True,
     help='please provide input',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json'
     )
 record_parser.add_argument(
     'othernames',
     required=True,
     help='please provide input',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json'
     )
 record_parser.add_argument(
     'email',
     required=True,
     help='please provide input',
-    type=str,
+    type=inputs.regex('^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$'),
     location='json'
     )
 record_parser.add_argument(
     'phoneNumber',
     required=True,
     help='please provide input',
-    type=str,
+    type=inputs.regex('^(?:\+?254)?[07]\d{9,13}$'),
     location='json'
     )
 record_parser.add_argument(
     'username',
     required=True,
     help='please comment',
-    type=str,
+    type=inputs.regex('^[a-zA-Z0-9]{4,10}$'),
     location='json'
     )
 record_parser.add_argument(
     'password',
     required=True,
     help='password required',
-    type=str,
+    type=inputs.regex('^[A-Za-z0-9@#$%^&+=]{6,}$'),
     location='json'
     )
-
 edit_parser = reqparse.RequestParser()
 
 edit_parser.add_argument(
     'firstname',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json')
 edit_parser.add_argument(
     'lastname',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json')
 edit_parser.add_argument(
     'othernames',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json'
     )
 edit_parser.add_argument(
     'email',
-    type=str,
+    type=inputs.regex('^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$'),
     location='json'
     )
 edit_parser.add_argument(
     'phoneNumber',
-    type=str,
+    type=inputs.regex('^(?:\+?254)?[07]\d{9,13}$'),
     location='json'
     )
 edit_parser.add_argument(
     'username',
-    type=str,
+    type=inputs.regex('^[a-zA-Z]{3,25}$'),
     location='json'
     )
 edit_parser.add_argument(
     'password',
-    type=str,
+    type=inputs.regex('^[A-Za-z0-9@#$%^&+=]{6,}$'),
     location='json'
     )
 
@@ -102,11 +102,15 @@ login_parser = reqparse.RequestParser()
 login_parser.add_argument(
     'username',
     type=str,
+    required=True,
+    help='username required',
     location='json'
 )
 login_parser.add_argument(
     'password',
     type=str,
+    required=True,
+    help='password required',
     location='json'
 )
 
@@ -138,10 +142,15 @@ class MyUsers(Resource):
     def get(self, user):
         if user['is_admin'] is True:
             response = ManipulateDbase().fetch()
+            if response:
+                return {
+                    "status": 200,
+                    "data": [{"incidents": response, "message": "successfull"}]
+                }, 200
             return {
-                "status": 200,
-                "data": [{"incidents": response, "message": "successfull"}]
-            }, 200
+                    "status": 404,
+                    "data": [{"message": "no records found"}]
+                }, 200
         return {
             "status": 403,
             "message": "Forbidden, only admin can view all users"
@@ -149,13 +158,33 @@ class MyUsers(Resource):
 
     def post(self):
         args = self.parser.parse_args()
+        username = args['username']
+        email = args['email']
+        # if len(email) > 7:
+        #     if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email) is None:
+        #         return {
+        #             "status": 400,
+        #             "message": "invalid email adress"
+        #         }, 400
+        user = ManipulateDbase().find_by_username(username)
+        if user:
+            return {
+                "status": 400,
+                "message": "username taken!"
+            }, 400
+        email = user = ManipulateDbase().find_by_username(email)
+        if email:
+            return {
+                "status": 400,
+                "message": "email taken!"
+            }, 400
         keys = args.keys()
         for key in keys:
             if not args[key]:
                 return {
-                    "status": 404,
+                    "status": 400,
                     "data": [{"message": "please provide input"}]
-                }, 404
+                }, 400
             user = Users(
                 firstname=args['firstname'],
                 lastname=args['lastname'],
@@ -182,14 +211,23 @@ class login(Resource):
     def post(self):
 
         data = login_parser.parse_args()
+        for key in data.keys():
+            if not data[key]:
+                return {
+                    "message": f"please provide {key}"
+                }, 400
+            
         username = data['username']
         user = ManipulateDbase().find_by_username(username)
-        # import pdb; pdb.set_trace()
-        # verify password
-        if not user or not user[1].verify_password(data['password']):
+        if not user:
             return {
-                'message': 'Invalid email or password, Please try again'
+                "message": "user not found, please register"
+            }, 404
+        if not user[1].verify_password(data['password']):
+            return {
+                'message': 'Invalid password, Please try again'
             }, 401
+        # import pdb; pdb.set_trace()
         access_token = generate_token(self, user[0]['id'], user[0]['isAdmin'])
         return {
             'message': 'You logged in successfully.',

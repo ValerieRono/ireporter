@@ -15,4 +15,4 @@ api.add_resource(MyIncident, '/incidents/<int:id>', endpoint='new_incident')
 
 api.add_resource(MyUsers, '/users', endpoint='users')
 api.add_resource(MyUser, '/users/<int:id>', endpoint='user')
-api.add_resource(login, '/user', endpoint='login')
+api.add_resource(login, '/users/login', endpoint='login')

@@ -56,19 +56,23 @@ def token_required(f):
     def decorated(*args, **kwargs):
         access = request.headers.get('Authorization')
         if not access:
-            return jsonify({'message': 'Authorization required!'}), 401
+            return make_response(jsonify({
+                "message": "Authorization required!",
+            }), 401)
 
         token = access.split(" ")[1]
         # ensure token is present
         if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
+            return make_response(jsonify({
+                "message": "token is missing!",
+            }), 401)
         
         user = decode_token(token)
         if isinstance(user, str):
             return make_response(jsonify({
                 "message": "unsuccessful",
                 "error": user
-            }), 400)
+            }), 401)
 
         return f(user=user, *args, **kwargs)
        
