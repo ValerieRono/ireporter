@@ -24,15 +24,6 @@ class BaseTestCase(unittest.TestCase):
             "username": "hella",
             "password": "badgirl"
         }
-        self.sign_up_existing_user = {
-            "firstname": "Valerie",
-            "lastname": "Rono",
-            "othernames": "other",
-            "email": "ronovalerie@gmail",
-            "phoneNumber": "number",
-            "username": "loki",
-            "password": "abc123"
-        }
         self.sign_up_user_no_data = {}
         self.sign_up_user_missing_field = {
             "firstname": "Valerie",
@@ -91,9 +82,24 @@ class BaseTestCase(unittest.TestCase):
             "username": "hella",
             "password": "badgirl"
         }
-        self.log_in_wrong_details = {
-            "username": "hell",
+        self.log_in_user_missing_field = {
             "password": "badgirl"
+        }
+        self.log_in_user_empty_String = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_user_whitespace = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_user_special_characters = {
+            "username": "hella",
+            "password": "badgirl"
+        }
+        self.log_in_wrong_details = {
+            "username": "hella",
+            "password": "badgir"
         }
         self.post_incident = {
             "type_of_incident": "Redflag",
@@ -102,22 +108,16 @@ class BaseTestCase(unittest.TestCase):
             "videos": "blah",
             "comment": "wow"
         }
-        self.post_existing_incident = {
-            "type_of_incident": "Redflag",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
-        }
+
         self.post_incident_no_data = {
 
         }
         self.post_incident_empty_string = {
             "type_of_incident": "Redflag",
-            "location": "",
+            "location": "blah",
             "images": "blah",
             "videos": "blah",
-            "comment": "wow"
+            "comment": ""
         }
         self.post_incident_whitespace = {
             "type_of_incident": "Redflag",
@@ -139,13 +139,7 @@ class BaseTestCase(unittest.TestCase):
             "videos": "blah",
             "comment": "&%$^%"
         }
-        self.post_incident_not_allows = {
-            "type_of_incident": "incident",
-            "location": "rongai",
-            "images": "blah",
-            "videos": "blah",
-            "comment": "wow"
-        }
+        self.post_incident_not_json = ()
         self.post_incident_not_String = {
             "type_of_incident": "Redflag",
             "location": "location",
@@ -159,6 +153,19 @@ class BaseTestCase(unittest.TestCase):
             "images": "blah",
             "videos": "blah",
             "comment": "21332"
+        }
+        self.edit_incident = {
+            "othernames": "others"
+        }
+        self.edit_incident_status = {
+            "status": "Resolved"
+        }
+        self.edit_incident_invalid = {
+            "othernames": ""
+        }
+        self.edit_incident_no_input = ()
+        self.edit_incident_location = {
+            "location": "location"
         }
 
     def tearDown(self):

@@ -2,7 +2,6 @@
 from datetime import datetime
 from flask_restful import fields, marshal
 from flask import current_app
-from passlib.apps import custom_app_context as pwd_context
 from werkzeug.security import generate_password_hash, check_password_hash
 
 

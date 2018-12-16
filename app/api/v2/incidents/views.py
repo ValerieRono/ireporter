@@ -30,7 +30,7 @@ record_parser.add_argument(
 record_parser.add_argument(
     'images',
     required=True,
-    help='please provide input',
+    help='Please provide input.',
     type=str,
     location='json'
     )

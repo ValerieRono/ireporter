@@ -9,276 +9,277 @@ class TestRequests(BaseTestCase):
 
     """Tests"""
     def register_user(self):
-        return self.client.post('api/v2/users',
-                                data=json.dumps(self.sign_up_user))
+
+        """ sign up test user """
+
+        response = self.client.post('api/v2/users',
+                                    data=json.dumps(self.sign_up_user),
+                                    headers={'content-type': 'application/json'}
+                                    )
+        return response
 
     def login_user(self):
-        return self.client.post('api/v2/user', data=json.dumps(
-            self.log_in_user),
-            headers={'content-type': "application/json"}
+         
+        """ sign in a user """
+
+        response = self.client.post(
+            'api/v2/user', data=json.dumps(self.log_in_user),
+            headers={'content-type': 'application/json'}
             )
+        return response
 
     def get_access_token(self):
+        
+        """ get jwt token """
+
         self.register_user()
         response = self.login_user()
-        return json.loads(response.data)["access_token"]
+        self.data = json.loads(response.data)   
+        self.token = self.data['access_token']
+
+        return self.token
+
+    def create_incident(self, data):
+        
+        """ post an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        incident = self.client.post(
+                                'api/v2/incidents',
+                                data=json.dumps(data),
+                                headers={'Authorization': "Bearer " + access_token}
+                                )
+        return incident
+
+    def edit_any_incident_field(self, data):
+
+        """ edit an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        incident = self.client.put(
+                                'api/v2/incidents/1',
+                                data=json.dumps(data),
+                                headers={'Authorization': "Bearer " + access_token}
+                                )
+        return incident
+
+    def edit_incident_not_found(self, data):
+
+        """ edit an incident """
+
+        self.get_access_token()
+        access_token = self.token
+        incident = self.client.put(
+                                'api/v2/incidents/50',
+                                data=json.dumps(data),
+                                headers={'Authorization': "Bearer " + access_token}
+                                )
+        return incident
 
     def test_create_new_incident(self):
-        """Test for registering a new user"""
-        response = self.client.post('api/v2/users', data=json.dumps(
-            self.sign_up_user), headers={'content-type': "application/json"})
+
+        """Test for creating a new incident"""
+
+        # authorised
+        response = self.create_incident(self.post_incident)
         self.assertEqual(response.status_code, 201)
-        response = self.client.post('api/v2/user', data=json.dumps(
-            self.log_in_user),
-            headers={'content-type': "application/json"}
-            )
-        self.assertEqual(response.status_code, 200)
-        access_token = (json.loads(response.data))["access_token"]
-        response = self.client.post(
-            'api/v2/incidents',
-            headers={'Authorization': "Bearer " + access_token,
-                     'content-type': "application/json"},
-            data=json.dumps(self.post_incident))
         result = json.loads(response.data)
         self.assertEqual(result['data'][0]['message'], "created incident record")
-        self.assertEqual(response.status_code, 201)
 
-    def test_get_all_incidents(self):
-        """Test for registering a new user"""
-        # not admin
-        response = self.client.post('api/v2/users', data=json.dumps(
-            self.sign_up_user), headers={'content-type': "application/json"})
-        response = self.client.post('api/v2/user', data=json.dumps(
-            self.log_in_user),
-            headers={'content-type': "application/json"}
-            )
-        # import pdb; pdb.set_trace()
-        access_token = (json.loads(response.data))["access_token"]
-        response = self.client.get(
-            'api/v2/incidents',
-            headers={'Authorization': "Bearer " + access_token}
-            )
+    def test_create_duplicate_incident(self):
+
+        """ Test for creating an incident that already exists """
+
+        self.create_incident(self.post_incident)
+        response = self.create_incident(self.post_incident)
+        self.assertEqual(response.status_code, 400)
         result = json.loads(response.data)
-        # import pdb; pdb.set_trace()
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(result['data'][0]['message'], "incident exists")
     
-    # def test_get_all_incidents_not_logged_in(self):
-    #     """Test for registering a new user"""
-    #     # not logged in
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.get('api/v2/incidents')
-    #     self.assertEqual(response.status_code, 404)
-    
-    # def test_get_one_incident(self):
-    #     """Test for registering a new user"""
-    #     # not admin, owner
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.post('api/v2/user', data=json.dumps(
-    #         self.log_in_user),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 200)
-    #     access_token = (json.loads(response.data))["access_token"]
-    #     response = self.client.get(
-    #         'api/v2/incidents/1',
-    #         headers={'Authorization': "Bearer " + access_token}
-    #         )
-    #     self.assertEqual(response.status_code, 200)
-    
-    # def test_get_incident(self):
-    #     """Test for registering a new user"""
-    #     # not admin, not owner
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.post('api/v2/user', data=json.dumps(
-    #         self.log_in_user),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 200)
-    #     access_token = (json.loads(response.data))["access_token"]
-    #     response = self.client.get(
-    #         'api/v2/incidents/1',
-    #         headers={'Authorization': "Bearer " + access_token}
-    #         )
-    #     self.assertEqual(response.status_code, 403)
-    
-    
+    def test_create_incident_not_logged_in(self):
 
-    # def test_duplicate_user(self):
-    #     """Test for registering a duplicate user"""
-    #     # duplicate user
-    #     response = self.client.post(
-    #         'api/v2/users', data=json.dumps(self.sign_up_existing_user),
-    #         headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 400)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'user exists!')
+        """Test for posting an incident"""
 
-    # def test_no_input(self):
-    #     # post no data
-    #     response = self.client.post(
-    #         'api/v2/users',
-    #         data=json.dumps(self.sign_up_user_no_data),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+        # correct request, missing token
+        response = self.client.post(
+                                    'api/v2/incidents',
+                                    data=json.dumps(self.post_incident),
+                                    headers={'content-type': 'application/json'}
+                                    )
+        self.assertEqual(response.status_code, 401)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "unauthorized")
 
-    # def test_missing_field(self):
-    #     # post invalid data
-    #     response = self.client.post(
-    #         'api/v2/users',
-    #         data=json.dumps(self.sign_up_user_missing_field),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+    def test_new_incident_no_comment(self):
 
-    # def test_new_user_with_empty_string(self):
-    #     """Test for signing up a user with empty stringd for field values"""
-    #     # empty string
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user_empty_string),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+        """Test for posting an incident without comment"""
+        
+        # no comment
+        response = self.create_incident(self.post_incident_empty_string)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "please comment")
 
-    # def test_new_user_with_wrong_email_format(self):
-    #     """Test for posting a redflag without a comment"""
-    #     # wrong email
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user_bad_email),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+    def test_no_input(self):
 
-    # def test_new_user_with_whitespaces(self):
-    #     """Test for registering a new user with invalid input data"""
-    #     # whitespaces
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user_whitespace),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+        """Test for posting an incident without data"""
 
-    # def test_new_user_with_special_characters(self):
-    #     """Test for registering a user, with invalid input data"""
-    #     # special characters
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user_special_characters),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+        # post no data
+        response = self.create_incident(self.post_incident_no_data)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "please provide input")
 
-    # def test_new_user_invalid_phone_number(self):
-    #     """Test for registering a user, with invalid input data"""
-    #     # invalid phone number
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user_invalid_phone_number),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+    def test_missing_field(self):
 
-    # def test_user_log_in(self):
-    #     """Test for logging in a user, with valid input data"""
-    #     # correct log in
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.post('api/v2/user', data=json.dumps(
-    #         self.log_in_user),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 200)
+        """Test for posting an incident with missing data"""
 
-    # def test_user_log_in_wrong_details(self):
-    #     """Test for logging in a user, with invalid input data"""
-    #     # incorrect log in
-    #     response = self.client.post('api/v2/users', data=json.dumps(
-    #         self.sign_up_user), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.post('api/v2/user', data=json.dumps(
-    #         self.log_in_wrong_details),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 404)
+        # post missing field
+        response = self.create_incident(self.post_incident_no_field)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "input data missing")
 
-    # def test_get_all_incidents(self):
-    #     """Test for viewing all redflags"""
-    #     # get all
-    #     response = self.client.get('api/v1/incidents')
-    #     self.assertEqual(response.status_code, 200)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'successfull')
+    def test_new_user_with_wrong_location_format(self):
 
-    # def test_get_specific_incident(self):
-    #     """Test for viewing a particular redflag"""
-    #     # existing redflag
-    #     response = self.client.post('api/v1/incidents', data=json.dumps(
-    #         self.incident), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.get(
-    #         'api/v1/incidents/1', headers={'content-type': 'application/json'}
-    #     )
-    #     self.assertEqual(response.status_code, 200)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'successfull')
+        """Test for posting an incident with missing data"""
 
-    # def test_get_incident_not_found(self):
-    #     """Test for viewing a redflag that does not exist"""
-    #     # redflag does not exist
-    #     response = self.client.get('api/v1/incidents/20')
-    #     self.assertEqual(response.status_code, 404)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'record not found')
+        # post wrong email
+        response = self.create_incident(self.post_incident_bad_location_format)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "please provide correct location")
 
-    # def test_edit_incident_not_found(self):
-    #     """Test for editing a redflag that does not exist"""
-    #     # redflag does not exist
-    #     response = self.client.put('api/v1/incidents/20')
-    #     self.assertEqual(response.status_code, 404)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'record not found')
+    def test_new_incident_with_whitespaces(self):
 
-    # def test_delete_incident_not_found(self):
-    #     """Test for viewing a redflag that does not exist"""
-    #     # redflag does not exist
-    #     response = self.client.delete('api/v1/incidents/20')
-    #     self.assertEqual(response.status_code, 404)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'record not found')
+        """Test for posting an incident with whitespaces"""
 
-    # def test_edit_an_incident(self): 
-    #     """Test for modifying a redflag """
-    #     # edit existing record
-    #     response = self.client.post('api/v1/incidents', data=json.dumps(
-    #         self.incident), headers={'content-type': "application/json"})
-    #     self.assertEqual(response.status_code, 201)
-    #     response = self.client.put(
-    #         'api/v1/incidents/1',
-    #         data=json.dumps(self.update_incident),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 200)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'updated record')
+        # post white spaces
+        response = self.create_incident(self.post_incident_whitespace)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "invalid input data")
 
-    # def test_user_delete_incident(self):
-    #     """Test for deleting a redflag"""
-    #     # delete existing record
-    #     response = self.client.delete('api/v1/incidents/2')
-    #     self.assertEqual(response.status_code, 200)
-    #     result = json.loads(response.data)
-    #     self.assertEqual(result['data'][0]["message"], 'deleted')
+    def test_new_incident_with_special_characters(self):
 
-    # def test_no_input(self):
-    #     # post no data
-    #     response = self.client.post(
-    #         'api/v1/incidents',
-    #         data=json.dumps(self.no_input),
-    #         headers={'content-type': "application/json"}
-    #         )
-    #     self.assertEqual(response.status_code, 400)
+        """Test for posting an incident with special characters"""
+
+        # post special characters
+        response = self.create_incident(self.post_incident_not_json)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "invalid input data")
+
+    def test_post_incident_not_json(self):
+
+        """Test for posting an incident with no-json input"""
+
+        # not json
+        response = self.create_incident(self.post_incident_special_characters)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "invalid input data")
+
+    def test_view_all_incidents(self):
+
+        """Test for viewing all incidents"""
+
+        self.create_incident(self.post_incident)
+        response = self.client.get('api/v2/incidents')
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "successful")
+
+    def test_view_an_incident(self):
+
+        """Test for viewing a specific incident"""
+        
+        self.create_incident(self.post_incident)
+        response = self.client.get('api/v2/incidents/1')
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "successful")
+
+    def test_view_incident_not_found(self):
+
+        """Test for viewing an incident that does not exist"""
+        # incident does not exist
+        self.create_incident(self.post_incident)
+        response = self.client.get('api/v2/incidents/56')
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "incident not found")
+
+    def test_edit_any_field(self):
+
+        """Test for modifying any incident field """
+
+        self.create_incident(self.post_incident)
+        response = self.edit_any_incident_field(self.edit_incident)
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "updated incident")
+
+    def test_edit_bad_input(self):
+
+        """Test for modifying an incident location """
+
+        self.create_incident(self.post_incident)
+        response = self.edit_any_incident_field(self.edit_incident_location)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "updated incident")
+
+    def test_delete_an_incident(self):
+
+        """Test for deleting a redflag"""
+        self.create_incident(self.post_incident)
+        access_token = self.token
+        response = self.client.delete(
+                                'api/v2/incidents/1',
+                                headers={'Authorization': "Bearer " + access_token}
+                                )
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "successfully deleted record")
+
+    def test_delete_incident_not_found(self):
+
+        self.create_incident(self.post_incident)
+        access_token = self.token
+        response = self.client.delete(
+                                      'api/v2/incidents/50',
+                                      headers={'Authorization': "Bearer " + access_token}
+                                     )
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "incident not found")
+
+    def test_edit_incident_invalid_data(self):
+
+        """Test for updating an incident using invalid data"""
+        self.create_incident(self.post_incident)
+        response = self.edit_any_incident_field(self.edit_incident_invalid)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "invalid input")
+
+    def test_edit_incident_not_found(self):
+
+        """Test for updating an incident"""
+        self.create_incident(self.post_incident)
+        response = self.edit_incident_not_found(self.edit_incident)
+        self.assertEqual(response.status_code, 404)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "incident not found")
+
+    def test_edit_incident_invalid_input(self):
+        """Test for updating an incident"""
+
+        self.create_incident(self.post_incident)        
+        response = self.edit_any_incident_field(self.edit_incident_no_input)
+        self.assertEqual(response.status_code, 400)
+        result = json.loads(response.data)
+        self.assertEqual(result['data'][0]['message'], "invalid input data")
