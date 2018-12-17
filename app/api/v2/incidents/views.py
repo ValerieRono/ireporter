@@ -208,11 +208,16 @@ class MyIncident(Resource):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if record:
             if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
-                ManipulateDbase().delete(id)      
+                if record['status'] == "draft":
+                    ManipulateDbase().delete(id)      
+                    return {
+                        "status": 200,
+                        "data": [{"message": "successfully deleted record"}]
+                    }, 200
                 return {
-                    "status": 200,
-                    "data": [{"message": "successfully deleted record"}]
-                }, 200
+                    "status": 403,
+                    "message": "forbidden, can only delete record under draft"
+                }, 403
             return {
                 "status": 403,
                 "message": "forbidden, can only delete own record"
