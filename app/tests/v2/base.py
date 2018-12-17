@@ -23,7 +23,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronovalerie@gmail.com",
             "phoneNumber": '0717245777',
             "username": "hella",
-            "password": "badgirl"
+            "password": "badgirl",
+            "confirm_password": "badgirl"
         }
         self.sign_up_user_no_data = {}
         self.sign_up_user_missing_field = {
@@ -32,7 +33,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronovaleri@gmail.com",
             "phoneNumber": "0717245777",
             "username": "loki",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.sign_up_user_empty_string = {
             "firstname": "",
@@ -41,7 +43,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronovaler@gmail.com",
             "phoneNumber": "0717245777",
             "username": "loki",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.sign_up_user_bad_email = {
             "firstname": "Valerie",
@@ -50,7 +53,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronovalegmail.com",
             "phoneNumber": "0717245777",
             "username": "loki",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.sign_up_user_whitespace = {
             "firstname": "uugg",
@@ -59,7 +63,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronoval@gmail.com",
             "phoneNumber": "0717245777",
             "username": " ",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.sign_up_user_special_characters = {
             "firstname": "Valerie",
@@ -68,7 +73,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronova@gmail.com",
             "phoneNumber": "0717245777",
             "username": "&&%%",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.sign_up_user_invalid_phone_number = {
             "firstname": "Valerie",
@@ -77,7 +83,8 @@ class BaseTestCase(unittest.TestCase):
             "email": "ronov@gmail.com",
             "phoneNumber": "number",
             "username": "loki",
-            "password": "abc123"
+            "password": "abc123",
+            "confirm_password": "abc123"
         }
         self.log_in_user = {
             "username": "hella",
