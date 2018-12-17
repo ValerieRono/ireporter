@@ -1,9 +1,9 @@
 # **IREPORTER** 
-[![Build Status](https://travis-ci.com/ValerieRono/ireporter.svg?branch=develop)](https://travis-ci.com/ValerieRono/ireporter) [![Coverage Status](https://coveralls.io/repos/github/ValerieRono/ireporter/badge.svg?branch=bg-fix-endpoints-output-format)](https://coveralls.io/github/ValerieRono/ireporter?branch=bg-fix-endpoints-output-format) [![Maintainability](https://api.codeclimate.com/v1/badges/99810ec26ae4eef15539/maintainability)](https://codeclimate.com/github/ValerieRono/ireporter/maintainability)
+[![Build Status](https://travis-ci.com/ValerieRono/ireporter.svg?branch=develop)](https://travis-ci.com/ValerieRono/ireporter) [![Coverage Status](https://coveralls.io/repos/github/ValerieRono/ireporter/badge.svg?branch=develop)](https://coveralls.io/github/ValerieRono/ireporter?branch=develop) [![Maintainability](https://api.codeclimate.com/v1/badges/99810ec26ae4eef15539/maintainability)](https://codeclimate.com/github/ValerieRono/ireporter/maintainability)
 
 A RESTFUL citizen-reporting api built on Python Flask that allows users to report incidences that need interventions from the government or that people need to be aware of(red flag records).
 
-This is deployed on HEROKU : https://ireporter-valerie.herokuapp.com/api/v1/incidents
+This is deployed on HEROKU : https://ireporter-valerie.herokuapp.com/api/v2/users
 
 
 ## **Prerequisites**
@@ -38,19 +38,31 @@ http://localhost:5000
 
 | METHOD        | ENDPOINT                    | DESCRIPTION                                        | 
 | --------------|:---------------------------:| ---------------------------------------------------| 
-| POST          | /api/v1/incidents           | Allows user to create a red flag record            |
-| GET           | /api/v1/incidents/          | Allows user to view all red flag records           |
-| GET           | /api/v1/incidents/<int:id>  | Allows user to view a specific red flag record     | 
-| PUT           | /api/v1/incidents/<int:id>  | Allows user to edit any field of a specific record |
-| DELETE        | /api/v1/incidents/<int:id>  | Allows user to delete a specific red flag record   |
+| POST          | /api/v2/users               | Allows user to sign up                             |
+| POST          | /api/v2/login               | Allows user to log in                              | 
+| GET           | /api/v2/users               | Allows admin to view all user records              |
+| POST          | /api/v2/incidents           | Allows user to create an incident record           |
+| GET           | /api/v2/incidents           | Allows user to view all records they created       |
+| GET           | /api/v2/incidents/<int:id>  | Allows user to view a specific record              | 
+| PUT           | /api/v2/incidents/<int:id>  | Allows user to edit any field of a specific record |
+| DELETE        | /api/v2/incidents/<int:id>  | Allows user to delete a record under draft         |
 
-post payload
+post incident payload
 ```
  { "createdBy" : "","type_of_incident" : "", "location" : "", "status": "", "images" : "", "videos" : "", "comment" : ""}
 ```
-put payload 
+put incident payload 
   ```
   {"createdBy": "changedname"} //any field name and value that you want to edit, can be multiple values
+  ```
+
+post user payload
+```
+ { "firstname" : "valerie", "lastname" : "rono", "othernames" : "neno", "email": "ronovalerie@gmail.com", "phoneNumber" : "0717245777", "username" : "thor", "password" : "98hygpfdc88"}
+```
+put user payload 
+  ```
+  {"firstname": "changedname"} //any field name and value that you want to edit, can be multiple values
   ```
 *where <int:id> is replaced by the id of the record you want to manipulate expressed as an interger*
 
