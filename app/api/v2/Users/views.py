@@ -37,7 +37,7 @@ record_parser.add_argument(
     'email',
     required=True,
     help='please provide input',
-    type=inputs.regex('^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$'),
+    type=inputs.regex('^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(\.[a-z]{2,4})$'),
     location='json'
     )
 record_parser.add_argument(
