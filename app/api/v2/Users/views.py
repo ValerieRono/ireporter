@@ -61,6 +61,13 @@ record_parser.add_argument(
     type=inputs.regex('^[A-Za-z0-9@#$%^&+=]{6,}$'),
     location='json'
     )
+record_parser.add_argument(
+    'confirm_password',
+    required=True,
+    help='password required',
+    type=str,
+    location='json'
+    )
 edit_parser = reqparse.RequestParser()
 
 edit_parser.add_argument(
@@ -179,6 +186,11 @@ class MyUsers(Resource):
             return {
                 "status": 400,
                 "message": "email taken!"
+            }, 400
+        if args['password'] != args['confirm_password']:
+            return {
+                "status": 400,
+                "message": "passwords don't match!"
             }, 400
         keys = args.keys()
         for key in keys:
