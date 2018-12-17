@@ -114,6 +114,14 @@ login_parser.add_argument(
     location='json'
 )
 
+admin_parser = reqparse.RequestParser()
+admin_parser.add_argument(
+    'isAdmin',
+    required=True,
+    help='please provide input',
+    location='json'
+)
+
 
 # for serialization
 class IncidentSchema(Schema):
@@ -160,12 +168,6 @@ class MyUsers(Resource):
         args = self.parser.parse_args()
         username = args['username']
         email = args['email']
-        # if len(email) > 7:
-        #     if re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email) is None:
-        #         return {
-        #             "status": 400,
-        #             "message": "invalid email adress"
-        #         }, 400
         user = ManipulateDbase().find_by_username(username)
         if user:
             return {
@@ -267,3 +269,19 @@ class MyUser(Resource):
             "status": 403,
             "message": "Forbidden, can only edit own record"
         }, 403
+
+
+class Admin(Resource):
+    def __init__(self):
+        super(Admin, self).__init__()
+    
+    @token_required
+    def patch(self, user, id):
+        data = admin_parser.parse_args()
+        if not data:
+            abort(400)
+        ManipulateDbase().edit(id, data)      
+        return {
+            "status": 200,
+            "data": [{"message": "successfully edited record"}]
+        }, 200
