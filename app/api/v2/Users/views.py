@@ -181,7 +181,7 @@ class MyUsers(Resource):
                 "status": 400,
                 "message": "username taken!"
             }, 400
-        email = user = ManipulateDbase().find_by_username(email)
+        email = ManipulateDbase().find_by_email(email)
         if email:
             return {
                 "status": 400,
