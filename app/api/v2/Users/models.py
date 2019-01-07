@@ -131,41 +131,6 @@ class ManipulateDbase():
         response = [user, email_user]
         return response
 
-    def find_by_email(self, identifier):
-        query = """SELECT user_id, firstname, lastname,
-                    othernames, username, email, phoneNumber, password,
-                    registered, isAdmin FROM users_table WHERE email = '{0}'""".format(identifier)
-        curr = self.db.cursor()
-        curr.execute(query)
-        data = curr.fetchone()
-        if data is None:
-            response = []
-            return response
-        user_id, firstname, lastname, othernames, username, email, phoneNumber, password, registered, isAdmin = data
-        user = dict(
-            id=user_id,
-            firstname=firstname,
-            lastname=lastname,
-            othernames=othernames,
-            username=username,
-            email=email,
-            phoneNumber=phoneNumber,
-            password=password,
-            registered=str(registered),
-            isAdmin=isAdmin
-        )
-        email_user = Users(
-            firstname=user['firstname'],
-            lastname=user['lastname'],
-            othernames=user['othernames'],
-            username=user['othernames'],
-            email=user['email'],
-            phoneNumber=user['phoneNumber'],
-            password=user['password']
-            )
-        response = [user, email_user]
-        return response
-
     def save(self, record_to_add):
         # save data
         query = """INSERT INTO users_table
@@ -190,6 +155,7 @@ class ManipulateDbase():
                     WHERE user_id = '{2}'""".format(key, data_to_edit[key], id,)
                 )
                 self.db.commit()
+
 
 record_fields = {
     "id": fields.Integer,
