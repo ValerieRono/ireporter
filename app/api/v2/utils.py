@@ -1,5 +1,5 @@
-
 from flask import request, jsonify, make_response
+from marshmallow import Schema, fields
 from datetime import datetime, timedelta
 from functools import wraps
 import jwt
@@ -77,3 +77,16 @@ def token_required(f):
         return f(user=user, *args, **kwargs)
        
     return decorated
+
+
+# for serialization
+class IncidentSchema(Schema):
+    id = fields.Int()
+    createdBy = fields.Int()
+    createdOn = fields.DateTime()
+    type_of_incident = fields.Str()
+    location = fields.Str()
+    status = fields.Str()
+    images = fields.Str()
+    videos = fields.Str()
+    comment = fields.Str()

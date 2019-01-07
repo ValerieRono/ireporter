@@ -1,12 +1,12 @@
 from flask import abort
 from flask_restful import Resource, reqparse, marshal, inputs
-from marshmallow import Schema, fields
+
 
 # local import
 from app.api.v2.incidents.models import Incidents, ManipulateDbase
 from app.api.v2.incidents.models import record_fields
 
-from app.api.v2.utils import token_required
+from app.api.v2.utils import token_required, IncidentSchema
 
 
 record_parser = reqparse.RequestParser()
@@ -84,19 +84,6 @@ status_parser.add_argument(
     help='status can only be Under investigation, Resolved or Rejection',
     location='json'
 )
-
-
-# for serialization
-class IncidentSchema(Schema):
-    id = fields.Int()
-    createdBy = fields.Int()
-    createdOn = fields.DateTime()
-    type_of_incident = fields.Str()
-    location = fields.Str()
-    status = fields.Str()
-    images = fields.Str()
-    videos = fields.Str()
-    comment = fields.Str()
 
 
 incident_Schema = IncidentSchema()

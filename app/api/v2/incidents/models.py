@@ -6,16 +6,15 @@ from app.database_config import connection
 
 
 class Incidents():
-    def __init__(self, createdBy, type_of_incident, location,
-                 images, videos, comment):
+    def __init__(self, **kwargs):
         self.createdOn = datetime.datetime.now()
-        self.createdBy = createdBy
-        self.type_of_incident = type_of_incident
-        self.location = location
+        self.createdBy = kwargs.get("createdBy")
+        self.type_of_incident = kwargs.get("type_of_incident")
+        self.location = kwargs.get("location")
         self.status = "draft"
-        self.images = images
-        self.videos = videos
-        self.comment = comment
+        self.images = kwargs.get("images")
+        self.videos = kwargs.get("videos")
+        self.comment = kwargs.get("comment")
 
 
 class ManipulateDbase():

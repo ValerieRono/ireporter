@@ -1,24 +1,13 @@
 from flask_restful import Resource, marshal
-from marshmallow import Schema, fields
 
 # local import
 from app.api.v1.models import record_fields, incidents
 from app.api.v1.models import record_parser, Incidents, edit_parser
-
-# for serialization 
-class IncidentSchema(Schema):
-    id = fields.Int()
-    createdOn = fields.Str()
-    createdBy = fields.Str()
-    type_of_incident = fields.Str()
-    location = fields.Str()
-    status = fields.Str()
-    images = fields.Str()
-    videos = fields.Str()
-    comment = fields.Str()
+from app.api.v2.utils import IncidentSchema
 
 incident_Schema = IncidentSchema()
 incidents_Schema = IncidentSchema(many=True)
+
 
 class MyIncidents(Resource):
 

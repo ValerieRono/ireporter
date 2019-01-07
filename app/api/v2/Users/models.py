@@ -13,16 +13,15 @@ class Users():
 
     """ user class """
 
-    def __init__(self, firstname, lastname, othernames,
-                 email, phoneNumber, username, password):
-        self.firstname = firstname
-        self.lastname = lastname
-        self.othernames = othernames
-        self.email = email
-        self.phoneNumber = phoneNumber
-        self.username = username
-        self.password = password
-        self.password_hash = generate_password_hash(password)
+    def __init__(self, **kwargs):
+        self.firstname = kwargs.get("firstname")
+        self.lastname = kwargs.get("lastname")
+        self.othernames = kwargs.get("othernames")
+        self.email = kwargs.get("email")
+        self.phoneNumber = kwargs.get("phoneNumber")
+        self.username = kwargs.get("username")
+        self.password = kwargs.get("password")
+        self.password_hash = generate_password_hash(self.password)
         self.registered = datetime.now
         self.isAdmin = False
 
