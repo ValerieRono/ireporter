@@ -11,8 +11,8 @@ from .database_config import create_tables
 
 def create_app(config_name):
     app = Flask(__name__, instance_relative_config=True)
-    # cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    # CORS(app)
     app.config.from_object(app_config[config_name])
     db_url = app.config.get('DATABASE_URL')
     create_tables(url=db_url)
