@@ -174,7 +174,6 @@ class MyUsers(Resource):
     def post(self):
         args = self.parser.parse_args()
         username = args['username']
-        email = args['email']
         user = ManipulateDbase().find_by_username(username)
         if user:
             return {
