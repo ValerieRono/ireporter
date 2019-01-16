@@ -146,7 +146,7 @@ class MyIncident(Resource):
     def get(self, user, id):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if record:
-            if user['user_id'] == record['createdBy'] or user['isAdmin'] is True:
+            if user['user_id'] == record['createdBy'] or user['is_admin'] is True:
                 result = ManipulateDbase().fetchone(id)
                 return {
                     "status": 200,
@@ -194,7 +194,7 @@ class MyIncident(Resource):
     def delete(self, user, id):
         record = incident_Schema.dump(ManipulateDbase().fetchone(id)).data
         if record:
-            if user['user_id'] == record['createdBy'] or user['isAdmin'] is True: 
+            if user['user_id'] == record['createdBy'] or user['is_admin'] is True: 
                 if record['status'] == "draft":
                     ManipulateDbase().delete(id)      
                     return {
