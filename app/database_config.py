@@ -47,8 +47,8 @@ def tables():
         status character varying(100) NOT NULL,
         comment character varying(200) NOT NULL,
         location character varying(200) NOT NULL,
-        images character varying(200) NOT NULL,
-        videos character varying(200) NOT NULL
+        images character varying(300) NOT NULL,
+        videos character varying(300) NOT NULL
     )"""
 
     queries = [users_table, incidents]

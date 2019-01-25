@@ -31,14 +31,14 @@ record_parser.add_argument(
     'images',
     required=True,
     help='Please provide input.',
-    type=list,
+    type=str,
     location='json'
     )
 record_parser.add_argument(
     'videos',
     required=True,
     help='please provide input',
-    type=list,
+    type=str,
     location='json'
     )
 record_parser.add_argument(
@@ -105,13 +105,9 @@ class MyIncidents(Resource):
             "data": [{"incidents": response, "message": "successfull"}]
         }, 200
 
-
     @token_required
     def post(self, user):
-        from flask import request
-        # import pdb; pdb.set_trace()
         data = record_parser.parse_args()
-        # import pdb; pdb.set_trace()
         keys = data.keys()
         for key in keys:
             if not data[key]:
