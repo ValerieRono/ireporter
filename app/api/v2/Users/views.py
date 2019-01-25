@@ -237,6 +237,7 @@ class login(Resource):
         # import pdb; pdb.set_trace()
         access_token = generate_token(self, user[0]['id'], user[0]['isAdmin'])
         return {
+            'status': 200,
             'message': 'You logged in successfully.',
             'access_token': access_token.decode()
         }, 200
