@@ -45,7 +45,7 @@ record_parser.add_argument(
     'comment',
     required=True,
     help='please comment',
-    type=inputs.regex('^[a-zA-Z\s*]{5,140}$'),
+    type=inputs.regex('[A-Za-z0-9\s]{5,140}[^\^]*'),
     location='json'
     )
 
@@ -74,7 +74,7 @@ edit_parser.add_argument(
     )
 edit_parser.add_argument(
     'comment',
-    type=inputs.regex('^[a-zA-Z]{5,140}$'),
+    type=inputs.regex('[A-Za-z0-9\s]{5,140}[^\^]*'),
     location='json'
     )
 status_parser = reqparse.RequestParser()
