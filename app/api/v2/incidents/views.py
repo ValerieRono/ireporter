@@ -64,12 +64,12 @@ edit_parser.add_argument(
     )
 edit_parser.add_argument(
     'images',
-    type=list,
+    type=str,
     location='json'
     )
 edit_parser.add_argument(
     'videos',
-    type=list,
+    type=str,
     location='json'
     )
 edit_parser.add_argument(
